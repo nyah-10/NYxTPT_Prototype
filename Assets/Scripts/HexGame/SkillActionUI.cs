@@ -100,7 +100,9 @@ public class SkillActionUI : MonoBehaviour
     {
         List<SkillDefinition> result = new();
         Add(result, playerSkills == null ? null : playerSkills.mainSkills);
+        AddUnique(result, Resources.Load<SkillDefinition>("Skills/Bonus/ShieldBash"));
         Add(result, playerSkills == null ? null : playerSkills.subSkills);
+        AddUnique(result, Resources.Load<SkillDefinition>("Skills/Bonus/GuardStance"));
         return result;
     }
 
@@ -108,6 +110,11 @@ public class SkillActionUI : MonoBehaviour
     {
         if (source == null) return;
         foreach (SkillDefinition skill in source) if (skill != null) target.Add(skill);
+    }
+
+    private static void AddUnique(List<SkillDefinition> target, SkillDefinition skill)
+    {
+        if (skill != null && !target.Contains(skill)) target.Add(skill);
     }
 
     private void CreateCard(Transform parent, SkillDefinition skill)

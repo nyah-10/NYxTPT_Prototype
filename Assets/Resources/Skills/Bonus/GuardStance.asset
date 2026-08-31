@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 176fc73c9a13a9240bb73818dc911fe8, type: 3}
+  m_Name: GuardStance
+  m_EditorClassIdentifier: Assembly-CSharp::SkillDefinition
+  displayName: "\uC218\uD638 \uD0DC\uC138"
+  description: "\uBC29\uC5B4 \uC790\uC138\uB97C \uCDE8\uD574 [color=#79E879]**\uBCF4\uD638\uB9C9 3**[/color]\uC744 1\uD134 \uB3D9\uC548 \uC5BB\uC2B5\uB2C8\uB2E4."
+  icon: {fileID: 0}
+  iconResourcePath: SkillIcons/first_aid
+  actionSlot: 1
+  initiative: 25
+  range: 0
+  areaRadius: 0
+  targetsSelf: 1
+  targetsAllies: 0
+  targetsEnemies: 0
+  effects:
+  - type: 8
+    value: 3
+    duration: 1

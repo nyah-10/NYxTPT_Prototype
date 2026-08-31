@@ -22,6 +22,7 @@
 - `Assets/Scripts/HexGame/SkillCardView.cs`: Separates card input from visual motion, keeps nested card canvases above the parent HUD, and spring-animates layout targets, hover lift, selection, drag following, inertia tilt, focus sorting, and disabled presentation with unscaled time.
 - `Assets/Scripts/HexGame/InitiativeOrderUI.cs`: Renders player/monster queue badges from `TurnManager` snapshots, highlights the active unit, dims completed entries, labels dead/disabled skips, shows monster ability cards before reveal, and displays short combat messages.
 - `Assets/Resources/SkillIcons/*.png`: Four generated square example icons for 검격, 마력탄, 응급 처치, and 도약, loaded through each skill's `iconResourcePath`.
+- `Assets/Resources/Skills/Bonus/*.asset`: Runtime-loaded bonus hand cards. `ShieldBash` is a main action that deals 1 damage and pushes 1 tile; `GuardStance` is a sub action that grants 3 shield for one turn. `SkillActionUI` appends them after their matching configured slot groups without changing the scene.
 - `Assets/Resources/UI/skill_hud_panel.png`: Original ornamental HUD panel retained as an available UI resource; the compact skill bar uses a code-rendered dark panel to avoid aspect distortion.
 - `Assets/Resources/SkillEffects/*.png`: Four generated transparent particle sprites used by `SkillParticleEffects` for Sword Strike, Arcane Bolt, First Aid, and Leap.
 - `Assets/Scripts/HexGame/UnitHealthBar.cs`: Displays a larger world-space HP bar and `CurrentHP / MaxHP` text above each unit. The fill changes from green to yellow to red as health falls.

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 176fc73c9a13a9240bb73818dc911fe8, type: 3}
+  m_Name: ShieldBash
+  m_EditorClassIdentifier: Assembly-CSharp::SkillDefinition
+  displayName: "\uBC29\uD328 \uBC00\uCE58\uAE30"
+  description: "\uC778\uC811\uD55C \uC801\uC5D0\uAC8C **1\uC758 \uD53C\uD574**\uB97C \uC8FC\uACE0 [color=#FFB347]1\uCE78 \uBC00\uCCD0\uB0C5\uB2C8\uB2E4[/color]."
+  icon: {fileID: 0}
+  iconResourcePath: SkillIcons/sword_strike
+  actionSlot: 0
+  initiative: 30
+  range: 1
+  areaRadius: 0
+  targetsSelf: 0
+  targetsAllies: 0
+  targetsEnemies: 1
+  effects:
+  - type: 0
+    value: 1
+    duration: 0
+  - type: 2
+    value: 1
+    duration: 0
