@@ -38,12 +38,20 @@ public class SkillActionUI : MonoBehaviour
     private void ShowFeedback(string message)
     {
         if (status != null) status.text = message;
+        if (detail != null && message.StartsWith("이동"))
+        {
+            detail.text = message.EndsWith("없음") ? "이동을 건너뜁니다." : "강조된 빈 타일을 클릭하세요.";
+            return;
+        }
         if (detail != null) detail.text = message == "타겟 없음" ? "공격을 건너뜁니다." : "강조된 적 유닛을 클릭하세요.";
     }
 
     private void Update()
     {
         RefreshStates();
+        PlayerController activePlayer = playerSkills == null ? null : playerSkills.GetComponent<PlayerController>();
+        if (activePlayer != null && activePlayer.turnManager != null && activePlayer.turnManager.Phase == RoundPhase.CardSelection)
+            return;
         if (selectedSkill == null || Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame ||
             EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
         Vector3 point = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
@@ -151,11 +159,9 @@ public class SkillActionUI : MonoBehaviour
     {
         if (!playerSkills.CanUse(skill)) { status.text = "이미 예약했거나 사용할 수 없는 카드입니다."; return; }
         selectedSkill = skill; Vector2Int source = playerSkills.GetPlanningSource();
-        bool chooseAtExecution = RequiresExecutionTarget(skill);
+        bool chooseAtExecution = true;
         selectedTarget = skill.targetsSelf || chooseAtExecution ? source : InvalidTarget;
-        Color color = skill.targetsSelf ? new(.2f, 1f, .35f, .55f) : skill.actionSlot == SkillActionSlot.Sub ? new(.15f, .8f, 1f, .8f) : new(1f, .35f, .12f, .65f);
-        gridManager.SetHighlights(gridManager.GetCoordinatesInRange(source, skill.range), color);
-        if (skill.targetsSelf) gridManager.SetSelectedHighlight(selectedTarget);
+        gridManager.ClearHighlights();
         status.text = skill.displayName;
         detail.text = chooseAtExecution ? "대상은 이 유닛의 실행 차례에 선택합니다." : skill.targetsSelf ? "자신이 대상으로 선택되었습니다. 사용 버튼을 누르세요." : "강조된 타일에서 대상을 선택하세요.";
         RefreshStates();
@@ -167,7 +173,7 @@ public class SkillActionUI : MonoBehaviour
         if (selectedSkill == null || selectedTarget == InvalidTarget) { status.text = selectedSkill == null ? "먼저 행동 카드를 선택하세요." : "강조된 타일에서 대상을 선택하세요."; return; }
         SkillDefinition committed = selectedSkill; Vector2Int target = selectedTarget;
         if (!playerSkills.Plan(committed, target, gridManager)) { status.text = "이 대상에게는 카드를 사용할 수 없습니다."; return; }
-        if (HasMovement(committed)) CreateGhost(target); gridManager.ClearHighlights(); selectedSkill = null; selectedTarget = InvalidTarget;
+        gridManager.ClearHighlights(); selectedSkill = null; selectedTarget = InvalidTarget;
         status.text = $"{committed.displayName} 예약 완료"; detail.text = playerSkills.HasCompletePlan ? "사용 / 공개 버튼을 눌러 행동을 시작하세요." : "다른 종류의 행동 카드도 선택할 수 있습니다."; RefreshStates();
     }
 

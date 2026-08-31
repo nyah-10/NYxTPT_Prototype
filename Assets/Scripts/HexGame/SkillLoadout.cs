@@ -17,12 +17,10 @@ public class SkillLoadout : MonoBehaviour
     private readonly struct PlannedAction
     {
         public readonly SkillDefinition Skill;
-        public readonly Vector2Int Target;
 
-        public PlannedAction(SkillDefinition skill, Vector2Int target)
+        public PlannedAction(SkillDefinition skill)
         {
             Skill = skill;
-            Target = target;
         }
     }
 
@@ -69,23 +67,8 @@ public class SkillLoadout : MonoBehaviour
     public bool Plan(SkillDefinition skill, Vector2Int targetCoordinate, HexGridManager grid)
     {
         if (skill == null || grid == null || !CanUse(skill)) return false;
-
-        if (RequiresExecutionTarget(skill))
-        {
-            // Attack targets are deliberately unresolved until this unit actually acts.
-            plannedActions.Add(new PlannedAction(skill, player.CurrentCoordinate));
-            return true;
-        }
-
-        if (!grid.TryGetTile(targetCoordinate, out _)) return false;
-
-        Vector2Int source = GetPlanningSource();
-        if (!skill.targetsSelf && HexGridManager.HexDistance(source, targetCoordinate) > skill.range) return false;
-
-        UnitStats target = FindUnitAt(targetCoordinate);
-        if ((skill.targetsEnemies || skill.targetsAllies) && target == null && !HasMovementEffect(skill)) return false;
-
-        plannedActions.Add(new PlannedAction(skill, targetCoordinate));
+        // Planning reserves only the card and order. Board choices belong to execution.
+        plannedActions.Add(new PlannedAction(skill));
         return true;
     }
 
@@ -102,8 +85,25 @@ public class SkillLoadout : MonoBehaviour
     {
         foreach (PlannedAction action in executionQueue)
         {
-            Vector2Int targetCoordinate = action.Target;
-            if (RequiresExecutionTarget(action.Skill))
+            Vector2Int targetCoordinate = player.CurrentCoordinate;
+            if (HasMovementEffect(action.Skill))
+            {
+                List<Vector2Int> destinations = FindValidDestinations(grid, player.CurrentCoordinate, action.Skill.range);
+                if (destinations.Count == 0)
+                {
+                    FeedbackRequested?.Invoke("이동할 칸 없음");
+                    continue;
+                }
+
+                FeedbackRequested?.Invoke("이동할 칸을 선택하세요");
+                grid.SetHighlights(destinations, new Color(.15f, .8f, 1f, .8f));
+                Vector2Int? selectedDestination = null;
+                yield return WaitForTileSelection(destinations, result => selectedDestination = result);
+                grid.ClearHighlights();
+                if (!selectedDestination.HasValue) continue;
+                targetCoordinate = selectedDestination.Value;
+            }
+            else if (RequiresExecutionTarget(action.Skill))
             {
                 List<UnitStats> candidates = FindValidTargets(action.Skill, player.CurrentCoordinate);
                 if (candidates.Count == 0)
@@ -136,13 +136,7 @@ public class SkillLoadout : MonoBehaviour
 
     public void ClearPlan() => plannedActions.Clear();
 
-    public Vector2Int GetPlanningSource()
-    {
-        Vector2Int source = player.CurrentCoordinate;
-        foreach (PlannedAction action in plannedActions)
-            if (HasMovementEffect(action.Skill)) source = action.Target;
-        return source;
-    }
+    public Vector2Int GetPlanningSource() => player.CurrentCoordinate;
 
     public bool HasPlannedSlot(SkillActionSlot slot)
     {
@@ -185,6 +179,34 @@ public class SkillLoadout : MonoBehaviour
             }
             yield return null;
         }
+    }
+
+    private IEnumerator WaitForTileSelection(List<Vector2Int> candidates, System.Action<Vector2Int> select)
+    {
+        while (true)
+        {
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame &&
+                (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject()))
+            {
+                Vector3 point = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+                RaycastHit2D hit = Physics2D.Raycast(point, Vector2.zero);
+                HexTile tile = hit.collider == null ? null : hit.collider.GetComponent<HexTile>();
+                if (tile != null && candidates.Contains(tile.Coordinate))
+                {
+                    select(tile.Coordinate);
+                    yield break;
+                }
+            }
+            yield return null;
+        }
+    }
+
+    private static List<Vector2Int> FindValidDestinations(HexGridManager grid, Vector2Int source, int range)
+    {
+        List<Vector2Int> result = grid.GetCoordinatesInRange(source, range);
+        result.Remove(source);
+        result.RemoveAll(coordinate => FindUnitAt(coordinate) != null);
+        return result;
     }
 
     private List<UnitStats> FindValidTargets(SkillDefinition skill, Vector2Int source)
