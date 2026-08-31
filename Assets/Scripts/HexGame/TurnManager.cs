@@ -34,6 +34,8 @@ public class TurnManager : MonoBehaviour
 
     public PlayerController player;
     public EnemyController enemy;
+    [Header("Execution Timing")]
+    [Min(0f)] public float turnTransitionDelay = 0.8f;
     public RoundPhase Phase { get; private set; }
     public bool IsPlayerTurn => Phase == RoundPhase.CardSelection || CurrentCombatant is PlayerController;
     public bool CanPlayerAct(PlayerController activePlayer) => Phase == RoundPhase.CardSelection || CurrentCombatant == activePlayer;
@@ -208,7 +210,7 @@ public class TurnManager : MonoBehaviour
             entry.State = QueueEntryState.SkippedDead;
             FeedbackRequested?.Invoke($"{entry.Combatant?.name ?? "유닛"}: 사망으로 턴 건너뜀");
             QueueChanged?.Invoke();
-            ExecuteNextQueueEntry();
+            ProceedToNextQueueEntry();
             return;
         }
 
@@ -222,14 +224,14 @@ public class TurnManager : MonoBehaviour
             entry.State = QueueEntryState.SkippedDisabled;
             FeedbackRequested?.Invoke($"{entry.Combatant.name}: 행동 불가로 턴 건너뜀");
             QueueChanged?.Invoke();
-            ExecuteNextQueueEntry();
+            ProceedToNextQueueEntry();
             return;
         }
 
         if (entry.IsPlayer)
         {
             SkillLoadout skills = entry.Combatant.GetComponent<SkillLoadout>();
-            if (skills == null || !skills.HasPlannedActions) { CompleteCurrentEntry(); ExecuteNextQueueEntry(); return; }
+            if (skills == null || !skills.HasPlannedActions) { CompleteCurrentEntry(); ProceedToNextQueueEntry(); return; }
             skills.ExecutePlan(FindAnyObjectByType<HexGridManager>());
             StartCoroutine(WaitForPlayerActions(skills));
             return;
@@ -242,7 +244,7 @@ public class TurnManager : MonoBehaviour
     {
         yield return new WaitUntil(() => skills == null || !skills.IsExecutingPlan);
         CompleteCurrentEntry();
-        ExecuteNextQueueEntry();
+        ProceedToNextQueueEntry();
     }
 
     private IEnumerator ExecuteEnemy(EnemyController activeEnemy)
@@ -250,6 +252,19 @@ public class TurnManager : MonoBehaviour
         PlayerController targetablePlayer = FindLivingPlayer();
         if (targetablePlayer != null) yield return activeEnemy.TakeTurn(targetablePlayer);
         CompleteCurrentEntry();
+        ProceedToNextQueueEntry();
+    }
+
+    private void ProceedToNextQueueEntry()
+    {
+        StartCoroutine(ProceedAfterTurnDelay());
+    }
+
+    private IEnumerator ProceedAfterTurnDelay()
+    {
+        if (turnTransitionDelay > 0f)
+            yield return new WaitForSeconds(turnTransitionDelay);
+
         ExecuteNextQueueEntry();
     }
 

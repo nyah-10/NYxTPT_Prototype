@@ -120,7 +120,8 @@ public class InitiativeOrderUI : MonoBehaviour
         SetRect(icon.rectTransform, new(0, .5f), new(0, .5f), new(0, .5f), new(7, 0), new(38, 38));
         Text label = CreateText(badge.transform, "Label", 17, TextAnchor.MiddleCenter);
         string state = item.State switch { QueueEntryState.SkippedDead => " · 사망", QueueEntryState.SkippedDisabled => " · 행동 불가", _ => "" };
-        label.text = $"{(item.IsPlayer ? "◆" : "●")} {item.Combatant?.name ?? "유닛"}  {item.Initiative}{state}";
+        string activeMarker = item.State == QueueEntryState.Acting ? "▶ " : "";
+        label.text = $"{activeMarker}{(item.IsPlayer ? "◆" : "●")} {item.Combatant?.name ?? "유닛"}  {item.Initiative}{state}";
         label.rectTransform.anchorMin = Vector2.zero; label.rectTransform.anchorMax = Vector2.one;
         label.rectTransform.offsetMin = new Vector2(44, 0); label.rectTransform.offsetMax = Vector2.zero;
     }

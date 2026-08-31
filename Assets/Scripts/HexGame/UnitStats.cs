@@ -15,7 +15,7 @@ public class UnitStats : MonoBehaviour
     private int shieldTurns;
     private int stunTurns;
     private int immobilizeTurns;
-    private readonly Dictionary<UnitStats, int> damageBySource = new();
+    private readonly Dictionary<string, int> damageBySource = new();
 
     public bool IsStunned => stunTurns > 0;
     public bool IsImmobilized => immobilizeTurns > 0;
@@ -36,14 +36,25 @@ public class UnitStats : MonoBehaviour
         CurrentHP = Mathf.Max(0, CurrentHP - appliedDamage);
         if (source != null && appliedDamage > 0)
         {
-            damageBySource[source] = GetThreatFrom(source) + appliedDamage;
+            string sourceKey = GetThreatKey(source);
+            damageBySource[sourceKey] = GetThreatFrom(source) + appliedDamage;
         }
 
         if (CurrentHP <= 0)
             Die();
     }
 
-    public int GetThreatFrom(UnitStats source) => source != null && damageBySource.TryGetValue(source, out int value) ? value : 0;
+    public int GetThreatFrom(UnitStats source)
+    {
+        return source != null && damageBySource.TryGetValue(GetThreatKey(source), out int value)
+            ? value
+            : 0;
+    }
+
+    private static string GetThreatKey(UnitStats source)
+    {
+        return source.gameObject.scene.path + "/" + source.transform.GetSiblingIndex() + "/" + source.name;
+    }
 
     public void AddShield(int amount, int duration)
     {
