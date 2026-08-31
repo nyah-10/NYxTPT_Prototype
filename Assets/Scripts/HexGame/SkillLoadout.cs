@@ -27,9 +27,6 @@ public class SkillLoadout : MonoBehaviour
     public bool HasPlannedActions => plannedActions.Count > 0;
     public bool HasCompletePlan => HasPlannedSlot(SkillActionSlot.Main) && HasPlannedSlot(SkillActionSlot.Sub);
     public bool IsExecutingPlan { get; private set; }
-    public SkillDefinition CurrentTopAction { get; private set; }
-    public SkillDefinition CurrentBottomAction { get; private set; }
-    public bool IsCurrentActionConfirmed { get; private set; }
     public event System.Action<string> FeedbackRequested;
 
     public int GetPlannedInitiative()
@@ -72,22 +69,6 @@ public class SkillLoadout : MonoBehaviour
         if (skill == null || grid == null || !CanUse(skill)) return false;
         // Planning reserves only the card and order. Board choices belong to execution.
         plannedActions.Add(new PlannedAction(skill));
-        return true;
-    }
-
-    public bool ConfirmCurrentAction(SkillDefinition top, SkillDefinition bottom)
-    {
-        if (top == null || bottom == null || top == bottom || IsExecutingPlan ||
-            top.actionSlot != SkillActionSlot.Main || bottom.actionSlot != SkillActionSlot.Sub ||
-            actionController.MainActionPoint <= 0 || actionController.SubActionPoint <= 0 ||
-            player.turnManager != null && !player.turnManager.CanPlayerAct(player)) return false;
-
-        plannedActions.Clear();
-        plannedActions.Add(new PlannedAction(top));
-        plannedActions.Add(new PlannedAction(bottom));
-        CurrentTopAction = top;
-        CurrentBottomAction = bottom;
-        IsCurrentActionConfirmed = true;
         return true;
     }
 
@@ -153,13 +134,7 @@ public class SkillLoadout : MonoBehaviour
         IsExecutingPlan = false;
     }
 
-    public void ClearPlan()
-    {
-        plannedActions.Clear();
-        CurrentTopAction = null;
-        CurrentBottomAction = null;
-        IsCurrentActionConfirmed = false;
-    }
+    public void ClearPlan() => plannedActions.Clear();
 
     public Vector2Int GetPlanningSource() => player.CurrentCoordinate;
 

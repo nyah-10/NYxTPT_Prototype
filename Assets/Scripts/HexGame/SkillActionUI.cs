@@ -2,44 +2,24 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 public class SkillActionUI : MonoBehaviour
 {
-    private sealed class CardSelectionState
-    {
-        public SkillCardView HoveredCard;
-        public SkillCardView FocusedCard;
-        public SkillCardView SelectedTopCard;
-        public SkillCardView SelectedBottomCard;
-        public bool IsConfirmed;
-    }
-
-    private sealed class CardVisual
-    {
-        public SkillCardView View;
-        public Image TopShade;
-        public Image BottomShade;
-        public Text TopMark;
-        public Text BottomMark;
-    }
-
-    private static readonly Color TopColor = new(1f, .42f, .12f, 1f);
-    private static readonly Color BottomColor = new(.08f, .76f, 1f, 1f);
+    private static readonly Color MainColor = new(1f, .43f, .12f, 1f);
+    private static readonly Color SubColor = new(.08f, .76f, 1f, 1f);
+    private static readonly Vector2Int InvalidTarget = new(-999, -999);
     public SkillLoadout playerSkills;
     public HexGridManager gridManager;
 
-    private readonly CardSelectionState selection = new();
-    private readonly List<CardVisual> cards = new();
-    private RectTransform handContent;
-    private GameObject modal;
-    private RectTransform modalCard;
-    private Text modalTitle, modalTop, modalBottom, modalInitiative;
-    private Image modalTopImage, modalBottomImage;
-    private Text topSlot, bottomSlot, preview;
-    private Button confirmButton;
-    private Text confirmLabel;
+    private readonly List<SkillCardView> cards = new();
+    private SkillDefinition selectedSkill;
+    private Vector2Int selectedTarget = InvalidTarget;
+    private Text status, detail;
+    private Button confirmButton, endTurnButton;
+    private GameObject movementGhost;
 
     private void Start()
     {
@@ -47,30 +27,46 @@ public class SkillActionUI : MonoBehaviour
         if (gridManager == null) gridManager = FindAnyObjectByType<HexGridManager>();
         EnsureEventSystem();
         CreateHud();
+        if (playerSkills != null) playerSkills.FeedbackRequested += ShowFeedback;
+    }
+
+    private void OnDestroy()
+    {
+        if (playerSkills != null) playerSkills.FeedbackRequested -= ShowFeedback;
+    }
+
+    private void ShowFeedback(string message)
+    {
+        if (status != null) status.text = message;
+        if (detail != null && message.StartsWith("이동"))
+        {
+            detail.text = message.EndsWith("없음") ? "이동을 건너뜁니다." : "강조된 빈 타일을 클릭하세요.";
+            return;
+        }
+        if (detail != null) detail.text = message == "타겟 없음" ? "공격을 건너뜁니다." : "강조된 적 유닛을 클릭하세요.";
     }
 
     private void Update()
     {
-        if (playerSkills == null) return;
-        if (selection.IsConfirmed && !playerSkills.IsCurrentActionConfirmed)
-        {
-            selection.IsConfirmed = false;
-            selection.SelectedTopCard = null;
-            selection.SelectedBottomCard = null;
-        }
-        bool canSelect = playerSkills.GetComponent<PlayerController>()?.turnManager?.Phase == RoundPhase.CardSelection;
-        if (!canSelect && !selection.IsConfirmed) CloseFocus();
-        if (modal != null && modal.activeSelf)
-        {
-            float blend = 1f - Mathf.Exp(-18f * Time.unscaledDeltaTime);
-            modalCard.localScale = Vector3.Lerp(modalCard.localScale, Vector3.one, blend);
-        }
-        RefreshSelectionVisuals();
+        RefreshStates();
+        PlayerController activePlayer = playerSkills == null ? null : playerSkills.GetComponent<PlayerController>();
+        if (activePlayer != null && activePlayer.turnManager != null && activePlayer.turnManager.Phase == RoundPhase.CardSelection)
+            return;
+        if (selectedSkill == null || Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame ||
+            EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+        Vector3 point = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        RaycastHit2D hit = Physics2D.Raycast(point, Vector2.zero);
+        HexTile tile = hit.collider == null ? null : hit.collider.GetComponent<HexTile>();
+        if (tile == null || !gridManager.GetCoordinatesInRange(playerSkills.GetPlanningSource(), selectedSkill.range).Contains(tile.Coordinate)) return;
+        selectedTarget = tile.Coordinate;
+        gridManager.SetSelectedHighlight(selectedTarget);
+        status.text = $"대상 타일 ({tile.Coordinate.x}, {tile.Coordinate.y}) 선택";
+        detail.text = "사용 버튼을 눌러 이 행동을 예약하세요.";
     }
 
     private void CreateHud()
     {
-        GameObject root = new("Card Selection HUD", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        GameObject root = new("Card HUD", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         root.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
         CanvasScaler scaler = root.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -78,239 +74,136 @@ public class SkillActionUI : MonoBehaviour
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = .5f;
 
-        CreateSelectionBar(root.transform);
-        CreateHand(root.transform);
-        CreateFocusModal(root.transform);
-        RefreshSelectionVisuals();
+        GameObject prompt = UiObject("Instruction Strip", root.transform, typeof(Image), typeof(Outline));
+        SetRect(prompt, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 414), new(900, 70));
+        prompt.GetComponent<Image>().color = new(.025f, .03f, .045f, .94f);
+        prompt.GetComponent<Outline>().effectColor = new(1f, .75f, .28f, .22f);
+        status = Label(prompt.transform, "행동 카드를 선택하세요", new(0, 13), new(850, 28), 20, TextAnchor.MiddleCenter, Color.white, true);
+        detail = Label(prompt.transform, "주 행동과 보조 행동을 한 장씩 예약할 수 있습니다.", new(0, -14), new(850, 22), 15, TextAnchor.MiddleCenter, new(.65f, .7f, .78f, 1f));
+
+        GameObject hand = UiObject("Card Hand", root.transform, typeof(Image), typeof(Outline));
+        SetRect(hand, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 18), new(1430, 380));
+        hand.GetComponent<Image>().color = new(.015f, .02f, .032f, .92f);
+        hand.GetComponent<Outline>().effectColor = new(.25f, .34f, .45f, .42f);
+
+        List<SkillDefinition> skills = ConfiguredSkills();
+        const float width = 250, gap = 20;
+        float total = skills.Count * width + Mathf.Max(0, skills.Count - 1) * gap;
+        float start = -665 + (1060 - total) * .5f + width * .5f;
+        for (int i = 0; i < skills.Count; i++) CreateCard(hand.transform, skills[i], new(start + i * (width + gap), 18));
+        CreateButtons(hand.transform);
+        RefreshStates();
     }
 
-    private void CreateSelectionBar(Transform parent)
+    private List<SkillDefinition> ConfiguredSkills()
     {
-        GameObject bar = Ui("Current Action", parent, typeof(Image), typeof(Outline));
-        SetRect(bar, new(.5f, 1), new(.5f, 1), new(.5f, 1), new(0, -78), new(1040, 124));
-        bar.GetComponent<Image>().color = new(.02f, .027f, .043f, .96f);
-        bar.GetComponent<Outline>().effectColor = new(.3f, .4f, .55f, .5f);
-        topSlot = Label(bar.transform, "첫 번째 선택\nTOP · 선택 필요", new(-320, 0), new(300, 88), 18, TextAnchor.MiddleLeft, Color.white);
-        bottomSlot = Label(bar.transform, "두 번째 선택\nBOTTOM · 선택 필요", new(0, 0), new(300, 88), 18, TextAnchor.MiddleLeft, Color.white);
-        preview = Label(bar.transform, "서로 다른 카드의 TOP과 BOTTOM을 선택하세요", new(300, 12), new(300, 48), 15, TextAnchor.MiddleCenter, new(.65f, .7f, .8f, 1f));
-        confirmButton = ActionButton(bar.transform, "Confirm Action", "행동 확정", new(300, -30), new(220, 44), new(.12f, .5f, .38f, 1f), ConfirmAction);
-        confirmLabel = confirmButton.GetComponentInChildren<Text>();
+        List<SkillDefinition> result = new();
+        Add(result, playerSkills == null ? null : playerSkills.mainSkills);
+        Add(result, playerSkills == null ? null : playerSkills.subSkills);
+        return result;
     }
 
-    private void CreateHand(Transform parent)
+    private static void Add(List<SkillDefinition> target, SkillDefinition[] source)
     {
-        GameObject panel = Ui("Hand Panel", parent, typeof(Image));
-        SetRect(panel, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 20), new(1760, 390));
-        panel.GetComponent<Image>().color = new(.012f, .017f, .028f, .94f);
-        Label(panel.transform, "마우스 휠 또는 드래그로 손패 탐색 · 카드를 클릭해 자세히 보기", new(0, 360), new(1200, 24), 15, TextAnchor.MiddleCenter, new(.58f, .65f, .75f, 1f));
-
-        GameObject viewport = Ui("Viewport", panel.transform, typeof(Image), typeof(Mask));
-        SetRect(viewport, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 12), new(1660, 340));
-        viewport.GetComponent<Image>().color = new(0, 0, 0, .001f);
-        viewport.GetComponent<Mask>().showMaskGraphic = false;
-        GameObject content = Ui("Cards", viewport.transform, typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
-        handContent = SetRect(content, new(0, .5f), new(0, .5f), new(0, .5f), new(28, 0), new(0, 320));
-        HorizontalLayoutGroup layout = content.GetComponent<HorizontalLayoutGroup>();
-        layout.padding = new RectOffset(38, 120, 4, 4);
-        layout.spacing = -82;
-        layout.childAlignment = TextAnchor.LowerLeft;
-        layout.childControlWidth = false; layout.childControlHeight = false;
-        layout.childForceExpandWidth = false; layout.childForceExpandHeight = false;
-        content.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-        ScrollRect scroll = panel.AddComponent<ScrollRect>();
-        scroll.viewport = viewport.GetComponent<RectTransform>(); scroll.content = handContent;
-        scroll.horizontal = true; scroll.vertical = false; scroll.scrollSensitivity = 42; scroll.inertia = true; scroll.decelerationRate = .12f;
-
-        int count = Mathf.Max(playerSkills.mainSkills?.Length ?? 0, playerSkills.subSkills?.Length ?? 0);
-        for (int i = 0; i < count; i++)
-        {
-            SkillDefinition top = i < (playerSkills.mainSkills?.Length ?? 0) ? playerSkills.mainSkills[i] : null;
-            SkillDefinition bottom = i < (playerSkills.subSkills?.Length ?? 0) ? playerSkills.subSkills[i] : null;
-            if (top != null || bottom != null) CreateHandCard(i, top, bottom);
-        }
-        Canvas.ForceUpdateCanvases();
-        foreach (CardVisual card in cards) card.View.CaptureRestPosition();
+        if (source == null) return;
+        foreach (SkillDefinition skill in source) if (skill != null) target.Add(skill);
     }
 
-    private void CreateHandCard(int index, SkillDefinition top, SkillDefinition bottom)
+    private void CreateCard(Transform parent, SkillDefinition skill, Vector2 position)
     {
-        GameObject go = Ui($"Hand Card {index + 1}", handContent, typeof(Canvas), typeof(GraphicRaycaster), typeof(Image), typeof(Outline), typeof(Shadow), typeof(LayoutElement), typeof(SkillCardView));
-        go.GetComponent<Canvas>().overrideSorting = true;
-        RectTransform rect = SetRect(go, Vector2.zero, Vector2.zero, new(.5f, 0), Vector2.zero, new(250, 318));
-        go.GetComponent<LayoutElement>().preferredWidth = 250; go.GetComponent<LayoutElement>().preferredHeight = 318;
-        Image background = go.GetComponent<Image>(); background.color = new(.085f, .095f, .12f, 1f);
-        Outline outline = go.GetComponent<Outline>(); outline.effectDistance = new(3, -3);
-        Shadow shadow = go.GetComponent<Shadow>(); shadow.effectColor = new(0, 0, 0, .72f); shadow.effectDistance = new(10, -12);
-        Label(rect, $"CARD {index + 1}", new(0, 139), new(216, 24), 14, TextAnchor.MiddleCenter, new(.72f, .77f, .84f, 1f), true);
-        Image topPanel = HalfPanel(rect, "TOP", top, new(0, 66), TopColor);
-        Image bottomPanel = HalfPanel(rect, "BOTTOM", bottom, new(0, -76), BottomColor);
-        Text topMark = Label(topPanel.transform, "", new(75, 49), new(54, 24), 13, TextAnchor.MiddleCenter, Color.white, true);
-        Text bottomMark = Label(bottomPanel.transform, "", new(75, 49), new(54, 24), 13, TextAnchor.MiddleCenter, Color.white, true);
-        SkillCardView view = go.GetComponent<SkillCardView>();
-        view.Initialize(index, top, bottom, rect, background, outline, HandleHover, OpenFocus);
-        cards.Add(new CardVisual { View = view, TopShade = topPanel, BottomShade = bottomPanel, TopMark = topMark, BottomMark = bottomMark });
+        Color accent = skill.actionSlot == SkillActionSlot.Main ? MainColor : SubColor;
+        GameObject go = UiObject($"Card - {skill.displayName}", parent, typeof(Image), typeof(Button), typeof(Outline), typeof(Shadow), typeof(SkillCardView));
+        RectTransform rect = SetRect(go, new(.5f, 0), new(.5f, 0), new(.5f, 0), position, new(250, 330));
+        Image background = go.GetComponent<Image>(); background.color = new(.095f, .105f, .13f, 1f);
+        Outline outline = go.GetComponent<Outline>(); outline.effectColor = accent; outline.effectDistance = new(3, -3);
+        Shadow shadow = go.GetComponent<Shadow>(); shadow.effectColor = new(0, 0, 0, .75f); shadow.effectDistance = new(10, -12);
+        Button button = go.GetComponent<Button>(); button.targetGraphic = background; button.transition = Selectable.Transition.None; button.onClick.AddListener(() => SelectSkill(skill));
+
+        Image header = UiObject("Header", rect, typeof(Image)).GetComponent<Image>();
+        SetRect(header.gameObject, new(0, 1), new(1, 1), new(.5f, 1), Vector2.zero, new(0, 42)); header.color = accent;
+        Label(header.transform, skill.actionSlot == SkillActionSlot.Main ? "MAIN ACTION" : "SUB ACTION", new(-50, 0), new(130, 30), 14, TextAnchor.MiddleLeft, new(.05f, .06f, .08f, 1f), true);
+        GameObject initiative = UiObject("Initiative", header.transform, typeof(Image));
+        SetRect(initiative, new(1, .5f), new(1, .5f), new(1, .5f), new(-8, 0), new(62, 30)); initiative.GetComponent<Image>().color = new(.035f, .04f, .055f, .92f);
+        Label(initiative.transform, skill.initiative.ToString("0"), Vector2.zero, new(56, 26), 17, TextAnchor.MiddleCenter, Color.white, true);
+
+        Image art = UiObject("Artwork", rect, typeof(Image)).GetComponent<Image>();
+        SetRect(art.gameObject, new(.5f, 1), new(.5f, 1), new(.5f, 1), new(0, -48), new(224, 130));
+        art.sprite = ResolveIcon(skill); art.preserveAspect = true; art.raycastTarget = false;
+        art.color = art.sprite == null ? new(.12f, .14f, .18f, 1f) : Color.white;
+        if (art.sprite == null) Label(art.transform, Initials(skill.displayName), Vector2.zero, new(180, 100), 42, TextAnchor.MiddleCenter, accent, true);
+        Label(rect, skill.displayName, new(0, 111), new(220, 34), 22, TextAnchor.MiddleCenter, Color.white, true);
+        Label(rect, PlainText(skill.description), new(0, 47), new(214, 78), 14, TextAnchor.UpperLeft, new(.82f, .84f, .88f, 1f));
+        Image rule = UiObject("Rule", rect, typeof(Image)).GetComponent<Image>();
+        SetRect(rule.gameObject, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 48), new(214, 2)); rule.color = new(accent.r, accent.g, accent.b, .6f);
+        Label(rect, $"사거리  {skill.range}", new(-56, 22), new(100, 28), 14, TextAnchor.MiddleLeft, new(.7f, .75f, .82f, 1f));
+        Label(rect, EffectSummary(skill), new(54, 22), new(112, 28), 14, TextAnchor.MiddleRight, accent, true);
+        SkillCardView view = go.GetComponent<SkillCardView>(); view.Initialize(skill, rect, background, outline, accent); cards.Add(view);
     }
 
-    private Image HalfPanel(Transform parent, string heading, SkillDefinition skill, Vector2 position, Color accent)
+    private void CreateButtons(Transform parent)
     {
-        Image panel = Ui(heading, parent, typeof(Image), typeof(Outline)).GetComponent<Image>();
-        SetRect(panel.gameObject, new(.5f, .5f), new(.5f, .5f), new(.5f, .5f), position, new(222, 126));
-        panel.color = new(.11f, .12f, .15f, 1f); panel.GetComponent<Outline>().effectColor = new(accent.r, accent.g, accent.b, .65f);
-        Label(panel.transform, heading, new(-68, 49), new(70, 22), 13, TextAnchor.MiddleLeft, accent, true);
-        Label(panel.transform, skill == null ? "효과 없음" : skill.displayName, new(0, 19), new(194, 28), 18, TextAnchor.MiddleLeft, Color.white, true);
-        Label(panel.transform, skill == null ? "-" : EffectSummary(skill), new(0, -16), new(194, 32), 15, TextAnchor.MiddleLeft, new(.78f, .81f, .87f, 1f));
-        Label(panel.transform, skill == null ? "" : $"사거리 {skill.range}  ·  선제도 {skill.initiative}", new(0, -45), new(194, 22), 13, TextAnchor.MiddleLeft, new(.58f, .65f, .75f, 1f));
-        return panel;
+        confirmButton = ActionButton(parent, "Confirm", "사용 / 공개", new(548, 80), new(250, 82), new(.12f, .54f, .42f, 1f), Confirm);
+        endTurnButton = ActionButton(parent, "End Turn", "턴 종료", new(548, -22), new(250, 64), new(.3f, .23f, .12f, 1f), EndTurn);
+        Label(parent, "카드를 고른 뒤\n대상을 선택하세요", new(548, -102), new(250, 52), 15, TextAnchor.MiddleCenter, new(.55f, .61f, .7f, 1f));
     }
 
-    private void CreateFocusModal(Transform parent)
+    private static Button ActionButton(Transform parent, string name, string caption, Vector2 position, Vector2 size, Color color, UnityEngine.Events.UnityAction action)
     {
-        modal = Ui("Card Focus Modal", parent, typeof(Image), typeof(Button));
-        SetRect(modal, Vector2.zero, Vector2.one, new(.5f, .5f), Vector2.zero, Vector2.zero);
-        modal.GetComponent<Image>().color = new(0, 0, 0, .72f);
-        modal.GetComponent<Button>().onClick.AddListener(CloseFocus);
-        GameObject card = Ui("Focused Card", modal.transform, typeof(Image), typeof(Outline), typeof(Shadow));
-        modalCard = SetRect(card, new(.5f, .5f), new(.5f, .5f), new(.5f, .5f), Vector2.zero, new(520, 720));
-        card.GetComponent<Image>().color = new(.055f, .065f, .09f, 1f);
-        card.GetComponent<Outline>().effectColor = new(.72f, .8f, .94f, .9f);
-        card.GetComponent<Shadow>().effectColor = new(0, 0, 0, .9f);
-        modalTitle = Label(card.transform, "", new(0, 315), new(450, 46), 29, TextAnchor.MiddleCenter, Color.white, true);
-        modalTopImage = FocusHalf(card.transform, "TOP", new(0, 142), TopColor, SelectFocusedTop, out modalTop);
-        modalBottomImage = FocusHalf(card.transform, "BOTTOM", new(0, -150), BottomColor, SelectFocusedBottom, out modalBottom);
-        modalInitiative = Label(card.transform, "", new(0, -326), new(440, 34), 18, TextAnchor.MiddleCenter, new(1f, .82f, .35f, 1f), true);
-        ActionButton(card.transform, "Close", "손패로 돌아가기", new(0, -378), new(250, 42), new(.18f, .22f, .3f, 1f), CloseFocus);
-        modal.SetActive(false);
+        GameObject go = UiObject(name, parent, typeof(Image), typeof(Button), typeof(Outline)); SetRect(go, new(.5f, .5f), new(.5f, .5f), new(.5f, .5f), position, size);
+        Image image = go.GetComponent<Image>(); image.color = color; go.GetComponent<Outline>().effectColor = new(1, 1, 1, .25f);
+        Button button = go.GetComponent<Button>(); button.targetGraphic = image; button.onClick.AddListener(action);
+        Label(go.transform, caption, Vector2.zero, size - new Vector2(12, 12), 20, TextAnchor.MiddleCenter, Color.white, true); return button;
     }
 
-    private Image FocusHalf(Transform parent, string heading, Vector2 position, Color accent, UnityEngine.Events.UnityAction action, out Text body)
+    private void SelectSkill(SkillDefinition skill)
     {
-        GameObject go = Ui(heading, parent, typeof(Image), typeof(Button), typeof(Outline));
-        SetRect(go, new(.5f, .5f), new(.5f, .5f), new(.5f, .5f), position, new(452, 252));
-        Image image = go.GetComponent<Image>(); image.color = new(.09f, .1f, .135f, 1f);
-        go.GetComponent<Outline>().effectColor = accent; go.GetComponent<Button>().onClick.AddListener(action);
-        Label(go.transform, heading, new(0, 102), new(400, 30), 20, TextAnchor.MiddleCenter, accent, true);
-        body = Label(go.transform, "", new(0, -4), new(392, 168), 19, TextAnchor.UpperLeft, Color.white);
-        return image;
+        if (!playerSkills.CanUse(skill)) { status.text = "이미 예약했거나 사용할 수 없는 카드입니다."; return; }
+        selectedSkill = skill; Vector2Int source = playerSkills.GetPlanningSource();
+        bool chooseAtExecution = true;
+        selectedTarget = skill.targetsSelf || chooseAtExecution ? source : InvalidTarget;
+        gridManager.ClearHighlights();
+        status.text = skill.displayName;
+        detail.text = chooseAtExecution ? "대상은 이 유닛의 실행 차례에 선택합니다." : skill.targetsSelf ? "자신이 대상으로 선택되었습니다. 사용 버튼을 누르세요." : "강조된 타일에서 대상을 선택하세요.";
+        RefreshStates();
     }
 
-    private void HandleHover(SkillCardView card, bool entered)
+    private void Confirm()
     {
-        selection.HoveredCard = entered ? card : selection.HoveredCard == card ? null : selection.HoveredCard;
-        foreach (CardVisual item in cards)
-        {
-            float push = 0;
-            if (entered && item.View != card) push = item.View.CardIndex < card.CardIndex ? -24 : 24;
-            Vector2 basePosition = item.View.BasePosition;
-            item.View.SetRestPosition(new(basePosition.x + push, basePosition.y));
-        }
+        if (selectedSkill == null && playerSkills.HasCompletePlan) { ClearGhost(); gridManager.ClearHighlights(); status.text = "카드를 공개합니다"; detail.text = "선제도가 낮은 카드부터 행동합니다."; playerSkills.GetComponent<PlayerController>().turnManager.SubmitPlayerActionCard(playerSkills); RefreshStates(); return; }
+        if (selectedSkill == null || selectedTarget == InvalidTarget) { status.text = selectedSkill == null ? "먼저 행동 카드를 선택하세요." : "강조된 타일에서 대상을 선택하세요."; return; }
+        SkillDefinition committed = selectedSkill; Vector2Int target = selectedTarget;
+        if (!playerSkills.Plan(committed, target, gridManager)) { status.text = "이 대상에게는 카드를 사용할 수 없습니다."; return; }
+        gridManager.ClearHighlights(); selectedSkill = null; selectedTarget = InvalidTarget;
+        status.text = $"{committed.displayName} 예약 완료"; detail.text = playerSkills.HasCompletePlan ? "사용 / 공개 버튼을 눌러 행동을 시작하세요." : "다른 종류의 행동 카드도 선택할 수 있습니다."; RefreshStates();
     }
 
-    private void OpenFocus(SkillCardView card)
+    private void EndTurn()
     {
-        selection.FocusedCard = card;
-        modalTitle.text = $"{card.TopSkill?.displayName ?? "TOP 없음"} / {card.BottomSkill?.displayName ?? "BOTTOM 없음"}";
-        modalTop.text = FocusDescription(card.TopSkill);
-        modalBottom.text = FocusDescription(card.BottomSkill);
-        modalInitiative.text = $"Initiative  {CombinedInitiative(card.TopSkill, card.BottomSkill)}";
-        modalTopImage.GetComponent<Button>().interactable = card.TopSkill != null;
-        modalBottomImage.GetComponent<Button>().interactable = card.BottomSkill != null;
-        modal.SetActive(true);
-        modalCard.localScale = Vector3.one * .82f;
+        PlayerController player = playerSkills == null ? null : playerSkills.GetComponent<PlayerController>();
+        if (player == null || player.turnManager == null || !player.turnManager.CanPlayerAct(player) || playerSkills.IsExecutingPlan) return;
+        selectedSkill = null; selectedTarget = InvalidTarget; ClearGhost(); gridManager.ClearHighlights();
+        status.text = playerSkills.HasPlannedActions ? "예약한 카드를 공개합니다" : "행동 없이 턴을 종료합니다"; detail.text = "몬스터 카드와 함께 행동 순서를 결정합니다.";
+        player.turnManager.SubmitPlayerActionCard(playerSkills); RefreshStates();
     }
 
-    private void CloseFocus() { selection.FocusedCard = null; if (modal != null) modal.SetActive(false); }
-    private void SelectFocusedTop() { SelectHalf(true); }
-    private void SelectFocusedBottom() { SelectHalf(false); }
-
-    private void SelectHalf(bool top)
+    private void RefreshStates()
     {
-        SkillCardView card = selection.FocusedCard;
-        if (card == null || selection.IsConfirmed) return;
-        if (top)
-        {
-            if (selection.SelectedTopCard == card) selection.SelectedTopCard = null;
-            else { selection.SelectedTopCard = card; if (selection.SelectedBottomCard == card) selection.SelectedBottomCard = null; }
-        }
-        else
-        {
-            if (selection.SelectedBottomCard == card) selection.SelectedBottomCard = null;
-            else { selection.SelectedBottomCard = card; if (selection.SelectedTopCard == card) selection.SelectedTopCard = null; }
-        }
-        RefreshSelectionVisuals();
+        foreach (SkillCardView card in cards) card.SetState(playerSkills != null && playerSkills.CanUse(card.Skill), card.Skill == selectedSkill);
+        if (confirmButton != null) confirmButton.interactable = selectedSkill != null && selectedTarget != InvalidTarget || selectedSkill == null && playerSkills.HasCompletePlan;
+        if (endTurnButton != null) { PlayerController player = playerSkills == null ? null : playerSkills.GetComponent<PlayerController>(); endTurnButton.interactable = player != null && player.turnManager != null && player.turnManager.CanPlayerAct(player) && !playerSkills.IsExecutingPlan; }
     }
 
-    private void ConfirmAction()
-    {
-        if (selection.IsConfirmed || selection.SelectedTopCard == null || selection.SelectedBottomCard == null ||
-            selection.SelectedTopCard == selection.SelectedBottomCard) return;
-        SkillDefinition top = selection.SelectedTopCard.TopSkill;
-        SkillDefinition bottom = selection.SelectedBottomCard.BottomSkill;
-        if (!playerSkills.ConfirmCurrentAction(top, bottom)) return;
-        selection.IsConfirmed = true;
-        CloseFocus();
-        RefreshSelectionVisuals();
-        PlayerController player = playerSkills.GetComponent<PlayerController>();
-        player.turnManager.SubmitPlayerActionCard(playerSkills);
-    }
-
-    private void RefreshSelectionVisuals()
-    {
-        foreach (CardVisual card in cards)
-        {
-            bool top = selection.SelectedTopCard == card.View;
-            bool bottom = selection.SelectedBottomCard == card.View;
-            card.View.SetSelection(top, bottom, selection.IsConfirmed);
-            card.TopMark.text = top ? "✓ 선택" : "";
-            card.BottomMark.text = bottom ? "✓ 선택" : "";
-            card.TopShade.color = bottom ? new(.07f, .075f, .09f, .55f) : new(.11f, .12f, .15f, 1f);
-            card.BottomShade.color = top ? new(.07f, .075f, .09f, .55f) : new(.11f, .12f, .15f, 1f);
-        }
-        SkillDefinition topSkill = selection.SelectedTopCard?.TopSkill;
-        SkillDefinition bottomSkill = selection.SelectedBottomCard?.BottomSkill;
-        if (topSlot != null) topSlot.text = topSkill == null ? "첫 번째 선택\nTOP · 선택 필요" : $"첫 번째 선택\n{topSkill.displayName} · TOP\n{EffectSummary(topSkill)}";
-        if (bottomSlot != null) bottomSlot.text = bottomSkill == null ? "두 번째 선택\nBOTTOM · 선택 필요" : $"두 번째 선택\n{bottomSkill.displayName} · BOTTOM\n{EffectSummary(bottomSkill)}";
-        bool valid = topSkill != null && bottomSkill != null && selection.SelectedTopCard != selection.SelectedBottomCard;
-        if (modal != null && modal.activeSelf && selection.FocusedCard != null)
-        {
-            bool focusedTop = selection.SelectedTopCard == selection.FocusedCard;
-            bool focusedBottom = selection.SelectedBottomCard == selection.FocusedCard;
-            modalTopImage.color = focusedBottom ? new(.045f, .05f, .065f, .58f) : focusedTop ? new(.24f, .12f, .07f, 1f) : new(.09f, .1f, .135f, 1f);
-            modalBottomImage.color = focusedTop ? new(.045f, .05f, .065f, .58f) : focusedBottom ? new(.055f, .18f, .24f, 1f) : new(.09f, .1f, .135f, 1f);
-        }
-        if (preview != null) preview.text = valid ? $"이번 라운드 행동\nInitiative {CombinedInitiative(topSkill, bottomSkill)}" : "서로 다른 카드의 TOP과 BOTTOM을 선택하세요";
-        if (confirmButton != null) { confirmButton.interactable = valid && !selection.IsConfirmed; confirmLabel.text = selection.IsConfirmed ? "확정 완료" : "행동 확정"; }
-    }
-
-    private static int CombinedInitiative(SkillDefinition top, SkillDefinition bottom)
-    {
-        int value = int.MaxValue;
-        if (top != null) value = Mathf.Min(value, Mathf.Max(1, top.initiative));
-        if (bottom != null) value = Mathf.Min(value, Mathf.Max(1, bottom.initiative));
-        return value == int.MaxValue ? 99 : value;
-    }
-
-    private static string FocusDescription(SkillDefinition skill)
-    {
-        if (skill == null) return "효과 없음";
-        return $"{skill.displayName}\n\n{EffectSummary(skill)}\n사거리 {skill.range}\n\n{PlainText(skill.description)}";
-    }
-
-    private static string EffectSummary(SkillDefinition skill)
-    {
-        if (skill?.effects == null || skill.effects.Length == 0) return "효과 없음";
-        List<string> parts = new();
-        foreach (SkillEffect effect in skill.effects)
-        {
-            string name = effect.type switch { SkillEffectType.Damage => "공격", SkillEffectType.Heal => "회복", SkillEffectType.Push => "밀치기", SkillEffectType.Pull => "당기기", SkillEffectType.Stun => "기절", SkillEffectType.Immobilize => "이동 불가", SkillEffectType.Move => "이동", SkillEffectType.Jump => "도약", SkillEffectType.Shield => "보호막", _ => "효과" };
-            parts.Add(effect.value > 0 ? $"{name} {effect.value}" : effect.duration > 0 ? $"{name} {effect.duration}턴" : name);
-        }
-        return string.Join(" · ", parts);
-    }
-
-    private static string PlainText(string value) { if (string.IsNullOrWhiteSpace(value)) return "추가 설명 없음"; return Regex.Replace(value, @"\[(?:/?color(?:=[^\]]+)?)\]", "", RegexOptions.IgnoreCase).Replace("**", "").Replace("*", ""); }
-    private static Button ActionButton(Transform parent, string name, string caption, Vector2 position, Vector2 size, Color color, UnityEngine.Events.UnityAction action) { GameObject go = Ui(name, parent, typeof(Image), typeof(Button), typeof(Outline)); SetRect(go, new(.5f, .5f), new(.5f, .5f), new(.5f, .5f), position, size); go.GetComponent<Image>().color = color; go.GetComponent<Outline>().effectColor = new(1, 1, 1, .2f); Button button = go.GetComponent<Button>(); button.onClick.AddListener(action); Label(go.transform, caption, Vector2.zero, size - new Vector2(8, 8), 18, TextAnchor.MiddleCenter, Color.white, true); return button; }
-    private static GameObject Ui(string name, Transform parent, params System.Type[] components) { GameObject go = new(name, components); go.transform.SetParent(parent, false); return go; }
+    private static bool HasMovement(SkillDefinition skill) { if (skill?.effects == null) return false; foreach (SkillEffect effect in skill.effects) if (effect.type == SkillEffectType.Move || effect.type == SkillEffectType.Jump) return true; return false; }
+    private static bool RequiresExecutionTarget(SkillDefinition skill) => skill != null && !skill.targetsSelf && (skill.targetsEnemies || skill.targetsAllies) && !HasMovement(skill);
+    private bool HasEnemyInRange(int range) { Vector2Int source = playerSkills.GetPlanningSource(); foreach (EnemyController enemy in FindObjectsByType<EnemyController>()) { UnitStats stats = enemy.GetComponent<UnitStats>(); if ((stats == null || stats.CurrentHP > 0) && HexGridManager.HexDistance(source, enemy.CurrentCoordinate) <= range) return true; } return false; }
+    private void CreateGhost(Vector2Int coordinate) { ClearGhost(); if (!gridManager.TryGetTile(coordinate, out HexTile tile)) return; SpriteRenderer source = playerSkills.GetComponentInChildren<SpriteRenderer>(); if (source == null || source.sprite == null) return; movementGhost = new("Planned Movement Ghost", typeof(SpriteRenderer)); SpriteRenderer ghost = movementGhost.GetComponent<SpriteRenderer>(); ghost.sprite = source.sprite; ghost.sortingLayerID = source.sortingLayerID; ghost.sortingOrder = source.sortingOrder + 1; ghost.color = new(source.color.r, source.color.g, source.color.b, .4f); movementGhost.transform.position = tile.transform.position; movementGhost.transform.localScale = source.transform.lossyScale; }
+    private void ClearGhost() { if (movementGhost != null) Destroy(movementGhost); movementGhost = null; }
+    private static string PlainText(string value) { if (string.IsNullOrWhiteSpace(value)) return "설명이 없습니다."; return Regex.Replace(value, @"\[(?:/?color(?:=[^\]]+)?)\]", "", RegexOptions.IgnoreCase).Replace("**", "").Replace("*", ""); }
+    private static Sprite ResolveIcon(SkillDefinition skill) { if (skill.icon != null) return skill.icon; if (string.IsNullOrWhiteSpace(skill.iconResourcePath)) return null; Texture2D texture = Resources.Load<Texture2D>(skill.iconResourcePath); return texture == null ? null : Sprite.Create(texture, new(0, 0, texture.width, texture.height), new(.5f, .5f), 100); }
+    private static string EffectSummary(SkillDefinition skill) { if (skill.effects == null || skill.effects.Length == 0) return "효과 없음"; SkillEffect effect = skill.effects[0]; string name = effect.type switch { SkillEffectType.Damage => "피해", SkillEffectType.Heal => "회복", SkillEffectType.Push => "밀치기", SkillEffectType.Pull => "당기기", SkillEffectType.Stun => "기절", SkillEffectType.Immobilize => "이동 불가", SkillEffectType.Move => "이동", SkillEffectType.Jump => "도약", SkillEffectType.Shield => "보호막", _ => "효과" }; return effect.value > 0 ? $"{name} {effect.value}" : name; }
+    private static string Initials(string value) { if (string.IsNullOrWhiteSpace(value)) return "?"; string[] words = value.Split(' '); return words.Length == 1 ? words[0][..1].ToUpperInvariant() : (words[0][..1] + words[^1][..1]).ToUpperInvariant(); }
+    private static GameObject UiObject(string name, Transform parent, params System.Type[] components) { GameObject go = new(name, components); go.transform.SetParent(parent, false); return go; }
     private static RectTransform SetRect(GameObject go, Vector2 min, Vector2 max, Vector2 pivot, Vector2 position, Vector2 size) { RectTransform rect = go.GetComponent<RectTransform>(); rect.anchorMin = min; rect.anchorMax = max; rect.pivot = pivot; rect.anchoredPosition = position; rect.sizeDelta = size; return rect; }
-    private static Text Label(Transform parent, string value, Vector2 position, Vector2 size, int fontSize, TextAnchor alignment, Color color, bool bold = false) { GameObject go = Ui("Text", parent, typeof(Text)); Text text = go.GetComponent<Text>(); text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); text.text = value; text.fontSize = fontSize; text.alignment = alignment; text.color = color; text.fontStyle = bold ? FontStyle.Bold : FontStyle.Normal; text.horizontalOverflow = HorizontalWrapMode.Wrap; text.verticalOverflow = VerticalWrapMode.Truncate; text.raycastTarget = false; SetRect(go, new(.5f, .5f), new(.5f, .5f), new(.5f, .5f), position, size); return text; }
+    private static Text Label(Transform parent, string value, Vector2 position, Vector2 size, int fontSize, TextAnchor alignment, Color color, bool bold = false) { GameObject go = UiObject("Text", parent, typeof(Text)); Text text = go.GetComponent<Text>(); text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); text.alignment = alignment; text.color = color; text.fontSize = fontSize; text.text = value; text.fontStyle = bold ? FontStyle.Bold : FontStyle.Normal; text.horizontalOverflow = HorizontalWrapMode.Wrap; text.verticalOverflow = VerticalWrapMode.Truncate; text.raycastTarget = false; SetRect(go, new(.5f, .5f), new(.5f, .5f), new(.5f, .5f), position, size); return text; }
     private static void EnsureEventSystem() { if (FindAnyObjectByType<EventSystem>() == null) new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule)); }
 }
