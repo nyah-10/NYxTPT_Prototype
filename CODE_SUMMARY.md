@@ -15,10 +15,10 @@
 - `Assets/Scripts/HexGame/ActionController.cs`: Owns one main AP and one sub AP per turn. `UseMainSkill()` spends main AP; `UseMoveAction()` spends sub AP.
 - `Assets/Scripts/HexGame/UnitStats.cs`: Owns HP, death, status durations, combat role, and damage-source threat totals. `TakeDamage()` applies shield mitigation, records actual damage by source, and triggers `Died` at zero.
 - `Assets/Scripts/HexGame/SkillDefinition.cs`: ScriptableObject template for a skill's display name, `initiative`, optional Sprite or Resources icon path, formatted description, slot, targeting data, area, and effect list. Lower initiative values act first.
-- `Assets/Scripts/HexGame/SkillLoadout.cs`: Holds configurable main/sub skills and an ordered per-round action plan. `Plan()` reserves only cards and their order; `ExecutePlan()` asks for movement destinations and attack targets from the live board when each action executes, skipping unavailable actions with HUD feedback.
+- `Assets/Scripts/HexGame/SkillLoadout.cs`: Holds configurable TOP/main and BOTTOM/sub skills and the authoritative confirmed `CurrentTopAction`/`CurrentBottomAction`. `ConfirmCurrentAction()` atomically creates the round plan only after UI confirmation; `ExecutePlan()` asks for movement destinations and attack targets from the live board when each action executes.
 - `Assets/Scripts/HexGame/SkillParticleEffects.cs`: Creates short-lived runtime `ParticleSystem` effects for the four example skills. Sword Strike emits layered slash arcs, Arcane Bolt sends plasma motes from source to target, First Aid lifts green pulse particles around the caster, and Leap bursts impact shards at the destination. Each system destroys its generated material when finished.
-- `Assets/Scripts/HexGame/SkillActionUI.cs`: Builds the FHD-scaled card hand and handles target-free ordered card planning. Board clicks are ignored during card selection; movement destinations, attack targets, and no-target feedback appear only during execution.
-- `Assets/Scripts/HexGame/SkillCardView.cs`: Animates card hover/selection lift, scale, focus ordering, accent outline, and disabled presentation with unscaled time.
+- `Assets/Scripts/HexGame/SkillActionUI.cs`: Pairs main/sub arrays by index into physical TOP/BOTTOM cards, builds the FHD-scaled overlapping horizontal hand, focus modal, persistent selection slots, unused-half dimming, combination preview, and confirm-only combat commit.
+- `Assets/Scripts/HexGame/SkillCardView.cs`: Owns each physical card's two skill references and animates 115% hover lift, neighbor separation, focus ordering, selected marking, and confirmed locking with unscaled time.
 - `Assets/Scripts/HexGame/InitiativeOrderUI.cs`: Renders player/monster queue badges from `TurnManager` snapshots, highlights the active unit, dims completed entries, labels dead/disabled skips, shows monster ability cards before reveal, and displays short combat messages.
 - `Assets/Resources/SkillIcons/*.png`: Four generated square example icons for 검격, 마력탄, 응급 처치, and 도약, loaded through each skill's `iconResourcePath`.
 - `Assets/Resources/UI/skill_hud_panel.png`: Original ornamental HUD panel retained as an available UI resource; the compact skill bar uses a code-rendered dark panel to avoid aspect distortion.
@@ -30,9 +30,9 @@
 
 1. Run **Tools > Hex Roguelike > Create Example Skills** to create Sword Strike, Arcane Bolt, First Aid, and Leap assets.
 2. Assign two `Main` and two `Sub` skills to `SkillLoadout`. The scene setup supplies all four examples.
-3. Select either a main or sub skill and press Confirm to reserve only the card. Board tiles and units cannot be selected during planning.
-4. Select the other action. Selection order determines whether main or sub resolves first.
-5. Once actions are reserved, press Confirm to reveal monster cards and build the round queue. The queue executes lower initiative cards first; a tied player acts before a monster.
+3. Scroll or drag the overlapping hand, hover to preview, then click a physical card to open its TOP/BOTTOM focus view.
+4. Select one card's TOP and a different card's BOTTOM. Until confirmation these choices live only in `CardSelectionState`; either half can be replaced or toggled off.
+5. Press **행동 확정** to atomically store both halves as the current action, lock the hand, reveal monster cards, and build the round queue. The queue executes lower initiative cards first; a tied player acts before a monster.
 6. When movement executes, the player chooses a currently free in-range tile. When an attack executes, candidates are recalculated; one is automatic, several wait for selection, and zero produces `타겟 없음` feedback.
 7. Damage, healing, shield, stun, immobilize, movement/jump, push, and pull are resolved by `SkillLoadout`.
 8. A successful immediate or planned commit calls `SkillParticleEffects.Play()` once after gameplay effects resolve.
