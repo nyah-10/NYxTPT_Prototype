@@ -18,7 +18,7 @@ public class SkillActionUI : MonoBehaviour
     private SkillDefinition selectedSkill;
     private Vector2Int selectedTarget = InvalidTarget;
     private Text status, detail;
-    private Button confirmButton, endTurnButton;
+    private Button confirmButton;
     private GameObject movementGhost;
     private SkillHandLayout handLayout;
 
@@ -76,14 +76,14 @@ public class SkillActionUI : MonoBehaviour
         scaler.matchWidthOrHeight = .5f;
 
         GameObject prompt = UiObject("Instruction Strip", root.transform, typeof(Image), typeof(Outline));
-        SetRect(prompt, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 414), new(900, 70));
+        SetRect(prompt, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 324), new(760, 58));
         prompt.GetComponent<Image>().color = new(.025f, .03f, .045f, .94f);
         prompt.GetComponent<Outline>().effectColor = new(1f, .75f, .28f, .22f);
-        status = Label(prompt.transform, "행동 카드를 선택하세요", new(0, 13), new(850, 28), 20, TextAnchor.MiddleCenter, Color.white, true);
-        detail = Label(prompt.transform, "주 행동과 보조 행동을 한 장씩 예약할 수 있습니다.", new(0, -14), new(850, 22), 15, TextAnchor.MiddleCenter, new(.65f, .7f, .78f, 1f));
+        status = Label(prompt.transform, "행동 카드를 선택하세요", new(0, 11), new(720, 24), 17, TextAnchor.MiddleCenter, Color.white, true);
+        detail = Label(prompt.transform, "주 행동과 보조 행동을 한 장씩 예약할 수 있습니다.", new(0, -11), new(720, 20), 13, TextAnchor.MiddleCenter, new(.65f, .7f, .78f, 1f));
 
         GameObject hand = UiObject("Card Hand", root.transform, typeof(Image), typeof(Outline), typeof(SkillHandLayout));
-        SetRect(hand, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 18), new(1430, 380));
+        SetRect(hand, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 14), new(1280, 292));
         hand.GetComponent<Image>().color = new(.015f, .02f, .032f, .92f);
         hand.GetComponent<Outline>().effectColor = new(.25f, .34f, .45f, .42f);
         handLayout = hand.GetComponent<SkillHandLayout>();
@@ -145,9 +145,8 @@ public class SkillActionUI : MonoBehaviour
 
     private void CreateButtons(Transform parent)
     {
-        confirmButton = ActionButton(parent, "Confirm", "사용 / 공개", new(548, 80), new(250, 82), new(.12f, .54f, .42f, 1f), Confirm);
-        endTurnButton = ActionButton(parent, "End Turn", "턴 종료", new(548, -22), new(250, 64), new(.3f, .23f, .12f, 1f), EndTurn);
-        Label(parent, "카드를 고른 뒤\n대상을 선택하세요", new(548, -102), new(250, 52), 15, TextAnchor.MiddleCenter, new(.55f, .61f, .7f, 1f));
+        confirmButton = ActionButton(parent, "Confirm", "사용 / 공개", new(520, 18), new(180, 58), new(.12f, .54f, .42f, 1f), Confirm);
+        Label(parent, "카드 선택 후 사용", new(520, -34), new(190, 24), 13, TextAnchor.MiddleCenter, new(.55f, .61f, .7f, 1f));
     }
 
     private static Button ActionButton(Transform parent, string name, string caption, Vector2 position, Vector2 size, Color color, UnityEngine.Events.UnityAction action)
@@ -193,7 +192,6 @@ public class SkillActionUI : MonoBehaviour
     {
         foreach (SkillCardView card in cards) card.SetState(playerSkills != null && playerSkills.CanUse(card.Skill), card.Skill == selectedSkill);
         if (confirmButton != null) confirmButton.interactable = selectedSkill != null && selectedTarget != InvalidTarget || selectedSkill == null && playerSkills.HasCompletePlan;
-        if (endTurnButton != null) { PlayerController player = playerSkills == null ? null : playerSkills.GetComponent<PlayerController>(); endTurnButton.interactable = player != null && player.turnManager != null && player.turnManager.CanPlayerAct(player) && !playerSkills.IsExecutingPlan; }
     }
 
     private static bool HasMovement(SkillDefinition skill) { if (skill?.effects == null) return false; foreach (SkillEffect effect in skill.effects) if (effect.type == SkillEffectType.Move || effect.type == SkillEffectType.Jump) return true; return false; }

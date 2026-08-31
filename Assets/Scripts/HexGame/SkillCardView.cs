@@ -111,8 +111,8 @@ public sealed class SkillCardView : MonoBehaviour, IPointerEnterHandler, IPointe
     private void Update()
     {
         if (rect == null) return;
-        float lift = selected ? 42f : hovered ? 32f : 0f;
-        float scale = hovered || dragging ? 1.1f : selected ? 1.055f : 1f;
+        float lift = selected ? 26f : hovered ? 22f : 0f;
+        float scale = hovered || dragging ? .88f : selected ? .83f : .78f;
         Vector2 desiredPosition = dragging ? dragPosition : targetPosition + Vector2.up * lift;
         float desiredRotation = dragging ? dragTilt : targetRotation;
         float blend = 1f - Mathf.Exp(-16f * Time.unscaledDeltaTime);

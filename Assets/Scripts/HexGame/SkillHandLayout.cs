@@ -3,13 +3,11 @@ using UnityEngine;
 
 public sealed class SkillHandLayout : MonoBehaviour
 {
-    [SerializeField] private float handCenterX = -130f;
-    [SerializeField] private float availableWidth = 1070f;
-    [SerializeField] private float cardWidth = 250f;
-    [SerializeField] private float preferredGap = 20f;
-    [SerializeField] private float minimumStep = 72f;
-    [SerializeField] private float arcHeight = 24f;
-    [SerializeField] private float maxRotation = 5f;
+    [SerializeField] private float handCenterX = -95f;
+    [SerializeField] private float availableWidth = 930f;
+    [SerializeField] private float cardWidth = 195f;
+    [SerializeField] private float preferredGap = 14f;
+    [SerializeField] private float minimumStep = 58f;
 
     private readonly List<SkillCardView> cards = new();
     private SkillCardView hoveredCard;
@@ -68,10 +66,9 @@ public sealed class SkillHandLayout : MonoBehaviour
 
         for (int i = 0; i < cards.Count; i++)
         {
-            float normalized = cards.Count == 1 ? 0f : i / (cards.Count - 1f) * 2f - 1f;
             float x = startX + i * step;
-            float y = 18f + (1f - Mathf.Abs(normalized)) * arcHeight;
-            float rotation = -normalized * maxRotation;
+            const float y = 30f;
+            const float rotation = 0f;
 
             if (hoveredIndex >= 0 && i != hoveredIndex)
             {
