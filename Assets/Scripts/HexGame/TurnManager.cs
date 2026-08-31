@@ -97,18 +97,21 @@ public class TurnManager : MonoBehaviour
             executionQueue.Add(new QueueEntry { Combatant = activeEnemy, Initiative = activeEnemy.CurrentCardInitiative, RegistrationOrder = ++registrationOrder });
         }
 
-        // A deterministic player-first tie break prevents confusing order changes.
-        executionQueue.Sort((a, b) =>
-        {
-            int byInitiative = a.Initiative.CompareTo(b.Initiative);
-            if (byInitiative != 0) return byInitiative;
-            if (a.IsPlayer != b.IsPlayer) return a.IsPlayer ? -1 : 1;
-            return a.RegistrationOrder.CompareTo(b.RegistrationOrder);
-        });
+        executionQueue.Sort(CompareQueueEntries);
 
         initiativeOrder.Clear();
         foreach (QueueEntry entry in executionQueue)
             initiativeOrder.Add($"{entry.Combatant.name} {entry.Initiative}");
+    }
+
+    private static int CompareQueueEntries(QueueEntry a, QueueEntry b)
+    {
+        int byInitiative = a.Initiative.CompareTo(b.Initiative);
+        if (byInitiative != 0) return byInitiative;
+
+        // Keep tie rules isolated so later initiative-rule changes do not affect queue construction.
+        if (a.IsPlayer != b.IsPlayer) return a.IsPlayer ? -1 : 1;
+        return a.RegistrationOrder.CompareTo(b.RegistrationOrder);
     }
 
     private IEnumerator RevealAndExecute()
