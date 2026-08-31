@@ -25,7 +25,16 @@ public class InitiativeOrderUI : MonoBehaviour
             builder.Append(entry);
             builder.Append(active ? " ]" : "  |");
         }
-        if (turnManager.Phase == RoundPhase.CardSelection) builder.Append("  Select action cards");
+        if (turnManager.Phase == RoundPhase.CardSelection)
+        {
+            builder.Append("  공개된 몬스터 카드: ");
+            foreach (EnemyController enemy in FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
+            {
+                UnitStats stats = enemy.GetComponent<UnitStats>();
+                if (stats == null || stats.IsDead) continue;
+                builder.Append(enemy.name).Append(" - ").Append(enemy.RevealedCardSummary).Append("  |  ");
+            }
+        }
         string value = builder.ToString();
         if (value == lastValue) return;
         lastValue = value;

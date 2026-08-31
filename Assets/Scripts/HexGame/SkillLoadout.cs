@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(ActionController))]
 public class SkillLoadout : MonoBehaviour
@@ -27,6 +29,7 @@ public class SkillLoadout : MonoBehaviour
     public bool HasPlannedActions => plannedActions.Count > 0;
     public bool HasCompletePlan => HasPlannedSlot(SkillActionSlot.Main) && HasPlannedSlot(SkillActionSlot.Sub);
     public bool IsExecutingPlan { get; private set; }
+    public event System.Action<string> FeedbackRequested;
 
     public int GetPlannedInitiative()
     {
@@ -65,7 +68,16 @@ public class SkillLoadout : MonoBehaviour
 
     public bool Plan(SkillDefinition skill, Vector2Int targetCoordinate, HexGridManager grid)
     {
-        if (skill == null || grid == null || !CanUse(skill) || !grid.TryGetTile(targetCoordinate, out _)) return false;
+        if (skill == null || grid == null || !CanUse(skill)) return false;
+
+        if (RequiresExecutionTarget(skill))
+        {
+            // Attack targets are deliberately unresolved until this unit actually acts.
+            plannedActions.Add(new PlannedAction(skill, player.CurrentCoordinate));
+            return true;
+        }
+
+        if (!grid.TryGetTile(targetCoordinate, out _)) return false;
 
         Vector2Int source = GetPlanningSource();
         if (!skill.targetsSelf && HexGridManager.HexDistance(source, targetCoordinate) > skill.range) return false;
@@ -90,7 +102,31 @@ public class SkillLoadout : MonoBehaviour
     {
         foreach (PlannedAction action in executionQueue)
         {
-            CommitPlanned(action, grid);
+            Vector2Int targetCoordinate = action.Target;
+            if (RequiresExecutionTarget(action.Skill))
+            {
+                List<UnitStats> candidates = FindValidTargets(action.Skill, player.CurrentCoordinate);
+                if (candidates.Count == 0)
+                {
+                    FeedbackRequested?.Invoke("타겟 없음");
+                    Debug.Log($"{name}: {action.Skill.displayName} - 타겟 없음");
+                    continue;
+                }
+
+                UnitStats selected = candidates.Count == 1 ? candidates[0] : null;
+                if (selected == null)
+                {
+                    FeedbackRequested?.Invoke("공격할 대상을 선택하세요");
+                    grid.SetHighlights(CoordinatesOf(candidates), new Color(1f, .25f, .12f, .75f));
+                    yield return WaitForTargetSelection(candidates, result => selected = result);
+                    grid.ClearHighlights();
+                }
+
+                if (selected == null || selected.IsDead) continue;
+                targetCoordinate = CoordinateOf(selected);
+            }
+
+            CommitPlanned(action.Skill, targetCoordinate, grid);
             // A movement-first plan must visually arrive before its following attack fires.
             if (HasMovementEffect(action.Skill))
                 yield return new WaitUntil(() => !player.IsMoving);
@@ -120,15 +156,66 @@ public class SkillLoadout : MonoBehaviour
         !HasPlannedSlot(skill.actionSlot) && (skill.actionSlot == SkillActionSlot.Main
         ? actionController.MainActionPoint > 0 : actionController.SubActionPoint > 0);
 
-    private void CommitPlanned(PlannedAction action, HexGridManager grid)
+    private void CommitPlanned(SkillDefinition skill, Vector2Int targetCoordinate, HexGridManager grid)
     {
         Vector2Int source = player.CurrentCoordinate;
-        UnitStats target = FindUnitAt(action.Target);
-        Spend(action.Skill);
-        foreach (SkillEffect effect in action.Skill.effects)
-            ApplyEffect(effect, target, action.Target, source, grid);
-        PlayParticleEffect(action.Skill, source, action.Target, grid);
+        UnitStats target = FindUnitAt(targetCoordinate);
+        Spend(skill);
+        foreach (SkillEffect effect in skill.effects)
+            ApplyEffect(effect, target, targetCoordinate, source, grid);
+        PlayParticleEffect(skill, source, targetCoordinate, grid);
     }
+
+    private IEnumerator WaitForTargetSelection(List<UnitStats> candidates, System.Action<UnitStats> select)
+    {
+        while (true)
+        {
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame &&
+                (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject()))
+            {
+                Vector3 point = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+                RaycastHit2D hit = Physics2D.Raycast(point, Vector2.zero);
+                HexTile tile = hit.collider == null ? null : hit.collider.GetComponent<HexTile>();
+                UnitStats clicked = tile == null ? null : FindUnitAt(tile.Coordinate);
+                if (clicked != null && candidates.Contains(clicked) && !clicked.IsDead)
+                {
+                    select(clicked);
+                    yield break;
+                }
+            }
+            yield return null;
+        }
+    }
+
+    private List<UnitStats> FindValidTargets(SkillDefinition skill, Vector2Int source)
+    {
+        List<UnitStats> result = new();
+        foreach (UnitStats stats in FindObjectsByType<UnitStats>(FindObjectsSortMode.None))
+        {
+            if (stats == null || stats.IsDead || stats.gameObject == gameObject) continue;
+            bool isEnemy = stats.GetComponent<EnemyController>() != null;
+            if (isEnemy != skill.targetsEnemies || HexGridManager.HexDistance(source, CoordinateOf(stats)) > skill.range) continue;
+            result.Add(stats);
+        }
+        return result;
+    }
+
+    private static List<Vector2Int> CoordinatesOf(List<UnitStats> units)
+    {
+        List<Vector2Int> result = new(units.Count);
+        foreach (UnitStats unit in units) result.Add(CoordinateOf(unit));
+        return result;
+    }
+
+    private static Vector2Int CoordinateOf(UnitStats stats)
+    {
+        PlayerController targetPlayer = stats.GetComponent<PlayerController>();
+        if (targetPlayer != null) return targetPlayer.CurrentCoordinate;
+        return stats.GetComponent<EnemyController>().CurrentCoordinate;
+    }
+
+    private static bool RequiresExecutionTarget(SkillDefinition skill) =>
+        skill != null && !skill.targetsSelf && (skill.targetsEnemies || skill.targetsAllies) && !HasMovementEffect(skill);
 
     private void Spend(SkillDefinition skill)
     {
@@ -146,7 +233,7 @@ public class SkillLoadout : MonoBehaviour
     {
         switch (effect.type)
         {
-            case SkillEffectType.Damage: target?.TakeDamage(effect.value); break;
+            case SkillEffectType.Damage: target?.TakeDamage(effect.value, GetComponent<UnitStats>()); break;
             case SkillEffectType.Heal: (target ?? GetComponent<UnitStats>())?.RestoreHealth(effect.value); break;
             case SkillEffectType.Shield: (target ?? GetComponent<UnitStats>())?.AddShield(effect.value, effect.duration); break;
             case SkillEffectType.Stun: target?.AddStun(effect.duration); break;

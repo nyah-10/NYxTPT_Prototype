@@ -27,6 +27,18 @@ public class SkillActionUI : MonoBehaviour
         if (gridManager == null) gridManager = FindAnyObjectByType<HexGridManager>();
         EnsureEventSystem();
         CreateHud();
+        if (playerSkills != null) playerSkills.FeedbackRequested += ShowFeedback;
+    }
+
+    private void OnDestroy()
+    {
+        if (playerSkills != null) playerSkills.FeedbackRequested -= ShowFeedback;
+    }
+
+    private void ShowFeedback(string message)
+    {
+        if (status != null) status.text = message;
+        if (detail != null) detail.text = message == "타겟 없음" ? "공격을 건너뜁니다." : "강조된 적 유닛을 클릭하세요.";
     }
 
     private void Update()
@@ -138,18 +150,15 @@ public class SkillActionUI : MonoBehaviour
     private void SelectSkill(SkillDefinition skill)
     {
         if (!playerSkills.CanUse(skill)) { status.text = "이미 예약했거나 사용할 수 없는 카드입니다."; return; }
-        selectedSkill = skill; Vector2Int source = playerSkills.GetPlanningSource(); selectedTarget = skill.targetsSelf ? source : InvalidTarget;
+        selectedSkill = skill; Vector2Int source = playerSkills.GetPlanningSource();
+        bool chooseAtExecution = RequiresExecutionTarget(skill);
+        selectedTarget = skill.targetsSelf || chooseAtExecution ? source : InvalidTarget;
         Color color = skill.targetsSelf ? new(.2f, 1f, .35f, .55f) : skill.actionSlot == SkillActionSlot.Sub ? new(.15f, .8f, 1f, .8f) : new(1f, .35f, .12f, .65f);
         gridManager.SetHighlights(gridManager.GetCoordinatesInRange(source, skill.range), color);
-        if (skill.targetsEnemies && !HasMovement(skill) && !HasEnemyInRange(skill.range))
-        {
-            status.text = "사거리 안에 적이 없습니다.";
-            detail.text = "다른 카드를 선택하거나 턴을 종료하세요.";
-            RefreshStates();
-            return;
-        }
         if (skill.targetsSelf) gridManager.SetSelectedHighlight(selectedTarget);
-        status.text = skill.displayName; detail.text = skill.targetsSelf ? "자신이 대상으로 선택되었습니다. 사용 버튼을 누르세요." : "강조된 타일에서 대상을 선택하세요."; RefreshStates();
+        status.text = skill.displayName;
+        detail.text = chooseAtExecution ? "대상은 이 유닛의 실행 차례에 선택합니다." : skill.targetsSelf ? "자신이 대상으로 선택되었습니다. 사용 버튼을 누르세요." : "강조된 타일에서 대상을 선택하세요.";
+        RefreshStates();
     }
 
     private void Confirm()
@@ -179,6 +188,7 @@ public class SkillActionUI : MonoBehaviour
     }
 
     private static bool HasMovement(SkillDefinition skill) { if (skill?.effects == null) return false; foreach (SkillEffect effect in skill.effects) if (effect.type == SkillEffectType.Move || effect.type == SkillEffectType.Jump) return true; return false; }
+    private static bool RequiresExecutionTarget(SkillDefinition skill) => skill != null && !skill.targetsSelf && (skill.targetsEnemies || skill.targetsAllies) && !HasMovement(skill);
     private bool HasEnemyInRange(int range) { Vector2Int source = playerSkills.GetPlanningSource(); foreach (EnemyController enemy in FindObjectsByType<EnemyController>(FindObjectsSortMode.None)) { UnitStats stats = enemy.GetComponent<UnitStats>(); if ((stats == null || stats.CurrentHP > 0) && HexGridManager.HexDistance(source, enemy.CurrentCoordinate) <= range) return true; } return false; }
     private void CreateGhost(Vector2Int coordinate) { ClearGhost(); if (!gridManager.TryGetTile(coordinate, out HexTile tile)) return; SpriteRenderer source = playerSkills.GetComponentInChildren<SpriteRenderer>(); if (source == null || source.sprite == null) return; movementGhost = new("Planned Movement Ghost", typeof(SpriteRenderer)); SpriteRenderer ghost = movementGhost.GetComponent<SpriteRenderer>(); ghost.sprite = source.sprite; ghost.sortingLayerID = source.sortingLayerID; ghost.sortingOrder = source.sortingOrder + 1; ghost.color = new(source.color.r, source.color.g, source.color.b, .4f); movementGhost.transform.position = tile.transform.position; movementGhost.transform.localScale = source.transform.lossyScale; }
     private void ClearGhost() { if (movementGhost != null) Destroy(movementGhost); movementGhost = null; }
