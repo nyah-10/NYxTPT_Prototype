@@ -125,6 +125,7 @@ public sealed class SkillCardView : MonoBehaviour, IPointerEnterHandler, IPointe
         Color target = usable ? selected ? new(.14f, .15f, .18f, 1f) : new(.095f, .105f, .13f, 1f) : new(.055f, .06f, .07f, .72f);
         background.color = Color.Lerp(background.color, target, blend);
         outline.effectColor = usable ? new(accent.r, accent.g, accent.b, selected ? 1f : hovered ? .9f : .62f) : new(.22f, .24f, .27f, .45f);
-        if (cardCanvas != null) cardCanvas.sortingOrder = dragging ? 100 : hovered || selected ? 50 : handIndex;
+        // Nested card canvases must always render above the parent HUD background.
+        if (cardCanvas != null) cardCanvas.sortingOrder = dragging ? 1200 : hovered || selected ? 1100 : 1000 + handIndex;
     }
 }

@@ -84,7 +84,9 @@ public class SkillActionUI : MonoBehaviour
 
         GameObject hand = UiObject("Card Hand", root.transform, typeof(Image), typeof(Outline), typeof(SkillHandLayout));
         SetRect(hand, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 14), new(1280, 292));
-        hand.GetComponent<Image>().color = new(.015f, .02f, .032f, .92f);
+        Image handBackground = hand.GetComponent<Image>();
+        handBackground.color = new(.015f, .02f, .032f, .92f);
+        handBackground.raycastTarget = false;
         hand.GetComponent<Outline>().effectColor = new(.25f, .34f, .45f, .42f);
         handLayout = hand.GetComponent<SkillHandLayout>();
 
