@@ -141,7 +141,7 @@ public class EnemyController : MonoBehaviour
     private UnitStats ResolveTarget(MonsterTargetRule rule, int range)
     {
         UnitStats best = null;
-        foreach (PlayerController candidate in FindObjectsByType<PlayerController>(FindObjectsSortMode.None))
+        foreach (PlayerController candidate in FindObjectsByType<PlayerController>())
         {
             UnitStats stats = candidate.GetComponent<UnitStats>();
             int distance = HexDistance(currentCoordinate, candidate.CurrentCoordinate);

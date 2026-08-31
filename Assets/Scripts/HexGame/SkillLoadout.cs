@@ -190,7 +190,7 @@ public class SkillLoadout : MonoBehaviour
     private List<UnitStats> FindValidTargets(SkillDefinition skill, Vector2Int source)
     {
         List<UnitStats> result = new();
-        foreach (UnitStats stats in FindObjectsByType<UnitStats>(FindObjectsSortMode.None))
+        foreach (UnitStats stats in FindObjectsByType<UnitStats>())
         {
             if (stats == null || stats.IsDead || stats.gameObject == gameObject) continue;
             bool isEnemy = stats.GetComponent<EnemyController>() != null;

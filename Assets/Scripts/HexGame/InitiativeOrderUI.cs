@@ -28,7 +28,7 @@ public class InitiativeOrderUI : MonoBehaviour
         if (turnManager.Phase == RoundPhase.CardSelection)
         {
             builder.Append("  공개된 몬스터 카드: ");
-            foreach (EnemyController enemy in FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
+            foreach (EnemyController enemy in FindObjectsByType<EnemyController>())
             {
                 UnitStats stats = enemy.GetComponent<UnitStats>();
                 if (stats == null || stats.IsDead) continue;
