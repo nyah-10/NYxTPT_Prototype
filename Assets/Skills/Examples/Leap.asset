@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 176fc73c9a13a9240bb73818dc911fe8, type: 3}
+  m_Name: Leap
+  m_EditorClassIdentifier: Assembly-CSharp::SkillDefinition
+  displayName: 도약
+  description: 유닛과 중간 장애물을 무시하고 최대 [color=#56D9FF]**3칸**[/color] 도약합니다.
+  icon: {fileID: 0}
+  iconResourcePath: SkillIcons/leap
+  actionSlot: 1
+  range: 3
+  areaRadius: 0
+  targetsSelf: 0
+  targetsAllies: 0
+  targetsEnemies: 1
+  effects:
+  - type: 7
+    value: 3
+    duration: 0

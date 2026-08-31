@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 176fc73c9a13a9240bb73818dc911fe8, type: 3}
+  m_Name: SwordStrike
+  m_EditorClassIdentifier: Assembly-CSharp::SkillDefinition
+  displayName: 검격
+  description: "인접한 적 하나를 베어 [color=#FFB347]**3의 피해**[/color]를 줍니다.\n*기본 공격 스킬입니다.*"
+  icon: {fileID: 0}
+  iconResourcePath: SkillIcons/sword_strike
+  actionSlot: 0
+  range: 1
+  areaRadius: 0
+  targetsSelf: 0
+  targetsAllies: 0
+  targetsEnemies: 1
+  effects:
+  - type: 0
+    value: 3
+    duration: 0

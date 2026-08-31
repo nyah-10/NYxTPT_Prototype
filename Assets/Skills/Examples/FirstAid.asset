@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 176fc73c9a13a9240bb73818dc911fe8, type: 3}
+  m_Name: FirstAid
+  m_EditorClassIdentifier: Assembly-CSharp::SkillDefinition
+  displayName: "\uC751\uAE09 \uCC98\uCE58"
+  description: "\uC790\uC2E0\uC758 \uCCB4\uB825\uC744 [color=#79E879]**2 \uD68C\uBCF5**[/color]\uD569\uB2C8\uB2E4.\n*\uBCF4\uC870
+    \uD589\uB3D9\uC744 \uC18C\uBAA8\uD569\uB2C8\uB2E4.*"
+  icon: {fileID: 0}
+  iconResourcePath: SkillIcons/first_aid
+  actionSlot: 1
+  range: 0
+  areaRadius: 1
+  targetsSelf: 1
+  targetsAllies: 0
+  targetsEnemies: 0
+  effects:
+  - type: 1
+    value: 2
+    duration: 0

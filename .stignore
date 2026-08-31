@@ -1,0 +1,42 @@
+// Keep Git metadata local to each PC. Both PCs use GitHub as the shared Git transport.
+/.git
+
+// Unity-generated caches and machine-local state
+/Library
+/Temp
+/Obj
+/Logs
+/UserSettings
+/MemoryCaptures
+/Recordings
+
+// Build output
+/Build
+/Builds
+
+// IDE-generated state
+/.vs
+/.idea
+/.vscode
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+// OS/editor temporary files
+*.tmp
+*.bak
+*.swp
+*.orig
+.DS_Store
+Thumbs.db
+Desktop.ini

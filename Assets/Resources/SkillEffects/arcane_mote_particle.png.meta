@@ -1,0 +1,1014 @@
+fileFormatVersion: 2
+guid: 17ae70effd22d0545b1a80daf0c0dc9d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5644177628282861531
+    second: arcane_mote_particle_0
+  - first:
+      213: 7252352269878028982
+    second: arcane_mote_particle_1
+  - first:
+      213: 8326118596093538934
+    second: arcane_mote_particle_2
+  - first:
+      213: 5621336789444612760
+    second: arcane_mote_particle_3
+  - first:
+      213: 2730679716196018044
+    second: arcane_mote_particle_4
+  - first:
+      213: -7766115989783822633
+    second: arcane_mote_particle_5
+  - first:
+      213: 123667464502338245
+    second: arcane_mote_particle_6
+  - first:
+      213: 1024176272801684494
+    second: arcane_mote_particle_7
+  - first:
+      213: 880588372029826715
+    second: arcane_mote_particle_8
+  - first:
+      213: -4896600860491813607
+    second: arcane_mote_particle_9
+  - first:
+      213: -8179113202092988389
+    second: arcane_mote_particle_10
+  - first:
+      213: -8395194717498996567
+    second: arcane_mote_particle_11
+  - first:
+      213: -5896198743663121368
+    second: arcane_mote_particle_12
+  - first:
+      213: 2940404072945074193
+    second: arcane_mote_particle_13
+  - first:
+      213: -2654480694297103690
+    second: arcane_mote_particle_14
+  - first:
+      213: -3660642385482538781
+    second: arcane_mote_particle_15
+  - first:
+      213: -8579498872565959961
+    second: arcane_mote_particle_16
+  - first:
+      213: -6820512452454749506
+    second: arcane_mote_particle_17
+  - first:
+      213: -5929258201582280402
+    second: arcane_mote_particle_18
+  - first:
+      213: 8865229296962183378
+    second: arcane_mote_particle_19
+  - first:
+      213: 1259228752639057596
+    second: arcane_mote_particle_20
+  - first:
+      213: 1266843528934666074
+    second: arcane_mote_particle_21
+  - first:
+      213: -6958201108656635181
+    second: arcane_mote_particle_22
+  - first:
+      213: 6984757712494185284
+    second: arcane_mote_particle_23
+  - first:
+      213: -8481852252762702289
+    second: arcane_mote_particle_24
+  - first:
+      213: 698028754792275306
+    second: arcane_mote_particle_25
+  - first:
+      213: 2612123218136307268
+    second: arcane_mote_particle_26
+  - first:
+      213: -9211291613489467295
+    second: arcane_mote_particle_27
+  - first:
+      213: 338821062556665149
+    second: arcane_mote_particle_28
+  - first:
+      213: 2495404133286182583
+    second: arcane_mote_particle_29
+  - first:
+      213: -5586795824149255951
+    second: arcane_mote_particle_30
+  - first:
+      213: 4295635747164577407
+    second: arcane_mote_particle_31
+  - first:
+      213: -38789288308682485
+    second: arcane_mote_particle_32
+  - first:
+      213: -1312765125813428922
+    second: arcane_mote_particle_33
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: arcane_mote_particle_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1241
+        height: 1236
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5284ef8e95adba1b0800000000000000
+      internalID: -5644177628282861531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_1
+      rect:
+        serializedVersion: 2
+        x: 735
+        y: 1162
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bae31007f785a460800000000000000
+      internalID: 7252352269878028982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_2
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 1054
+        width: 62
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 672fdeddfb05c8370800000000000000
+      internalID: 8326118596093538934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_3
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 1034
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8925ea1e600030e40800000000000000
+      internalID: 5621336789444612760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_4
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 996
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c776a3febb255e520800000000000000
+      internalID: 2730679716196018044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_5
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 953
+        width: 68
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7de347867a6393490800000000000000
+      internalID: -7766115989783822633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_6
+      rect:
+        serializedVersion: 2
+        x: 1141
+        y: 964
+        width: 10
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c26feb57ea57b100800000000000000
+      internalID: 123667464502338245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_7
+      rect:
+        serializedVersion: 2
+        x: 1157
+        y: 926
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0c5abfc4ea963e00800000000000000
+      internalID: 1024176272801684494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_8
+      rect:
+        serializedVersion: 2
+        x: 1246
+        y: 546
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b966d24757a783c00800000000000000
+      internalID: 880588372029826715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_9
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 304
+        width: 17
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91d638fe577cb0cb0800000000000000
+      internalID: -4896600860491813607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_10
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 304
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b182a83a0e3fd7e80800000000000000
+      internalID: -8179113202092988389
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_11
+      rect:
+        serializedVersion: 2
+        x: 1167
+        y: 300
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a88c3352e64e7b80800000000000000
+      internalID: -8395194717498996567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_12
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 260
+        width: 7
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82cead66b7e7c2ea0800000000000000
+      internalID: -5896198743663121368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_13
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 264
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 110c008ece96ec820800000000000000
+      internalID: 2940404072945074193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_14
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 246
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b2f9416fd3692bd0800000000000000
+      internalID: -2654480694297103690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_15
+      rect:
+        serializedVersion: 2
+        x: 844
+        y: 111
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e023933529c23dc0800000000000000
+      internalID: -3660642385482538781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_16
+      rect:
+        serializedVersion: 2
+        x: 866
+        y: 100
+        width: 21
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e277d54b3f7fe880800000000000000
+      internalID: -8579498872565959961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_17
+      rect:
+        serializedVersion: 2
+        x: 884
+        y: 114
+        width: 25
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eba6e45af0ca851a0800000000000000
+      internalID: -6820512452454749506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_18
+      rect:
+        serializedVersion: 2
+        x: 884
+        y: 103
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e21ed19841b07bda0800000000000000
+      internalID: -5929258201582280402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_19
+      rect:
+        serializedVersion: 2
+        x: 904
+        y: 111
+        width: 28
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d021d9531f970b70800000000000000
+      internalID: 8865229296962183378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_20
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 128
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbe520cf0eda97110800000000000000
+      internalID: 1259228752639057596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_21
+      rect:
+        serializedVersion: 2
+        x: 948
+        y: 128
+        width: 18
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5f27204a7bb49110800000000000000
+      internalID: 1266843528934666074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_22
+      rect:
+        serializedVersion: 2
+        x: 1013
+        y: 101
+        width: 19
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d2cac235f08f6f90800000000000000
+      internalID: -6958201108656635181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_23
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 86
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44bc267f128dee060800000000000000
+      internalID: 6984757712494185284
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_24
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 83
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2e7bbc90586a4a80800000000000000
+      internalID: -8481852252762702289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_25
+      rect:
+        serializedVersion: 2
+        x: 836
+        y: 65
+        width: 23
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6dd6644475efa900800000000000000
+      internalID: 698028754792275306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_26
+      rect:
+        serializedVersion: 2
+        x: 856
+        y: 77
+        width: 29
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 446909e2a30204420800000000000000
+      internalID: 2612123218136307268
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_27
+      rect:
+        serializedVersion: 2
+        x: 938
+        y: 85
+        width: 24
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 160fc6fb41bea2080800000000000000
+      internalID: -9211291613489467295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_28
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 66
+        width: 20
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d354c1416fbb3b400800000000000000
+      internalID: 338821062556665149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_29
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 63
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7be709786d471a220800000000000000
+      internalID: 2495404133286182583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_30
+      rect:
+        serializedVersion: 2
+        x: 826
+        y: 67
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f8a2fc4cc6b772b0800000000000000
+      internalID: -5586795824149255951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_31
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 71
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7ed63ae3f92d9b30800000000000000
+      internalID: 4295635747164577407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_32
+      rect:
+        serializedVersion: 2
+        x: 802
+        y: 42
+        width: 25
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0155490951367ff0800000000000000
+      internalID: -38789288308682485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arcane_mote_particle_33
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 39
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64d9e5ac21f18cde0800000000000000
+      internalID: -1312765125813428922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      arcane_mote_particle_0: -5644177628282861531
+      arcane_mote_particle_1: 7252352269878028982
+      arcane_mote_particle_10: -8179113202092988389
+      arcane_mote_particle_11: -8395194717498996567
+      arcane_mote_particle_12: -5896198743663121368
+      arcane_mote_particle_13: 2940404072945074193
+      arcane_mote_particle_14: -2654480694297103690
+      arcane_mote_particle_15: -3660642385482538781
+      arcane_mote_particle_16: -8579498872565959961
+      arcane_mote_particle_17: -6820512452454749506
+      arcane_mote_particle_18: -5929258201582280402
+      arcane_mote_particle_19: 8865229296962183378
+      arcane_mote_particle_2: 8326118596093538934
+      arcane_mote_particle_20: 1259228752639057596
+      arcane_mote_particle_21: 1266843528934666074
+      arcane_mote_particle_22: -6958201108656635181
+      arcane_mote_particle_23: 6984757712494185284
+      arcane_mote_particle_24: -8481852252762702289
+      arcane_mote_particle_25: 698028754792275306
+      arcane_mote_particle_26: 2612123218136307268
+      arcane_mote_particle_27: -9211291613489467295
+      arcane_mote_particle_28: 338821062556665149
+      arcane_mote_particle_29: 2495404133286182583
+      arcane_mote_particle_3: 5621336789444612760
+      arcane_mote_particle_30: -5586795824149255951
+      arcane_mote_particle_31: 4295635747164577407
+      arcane_mote_particle_32: -38789288308682485
+      arcane_mote_particle_33: -1312765125813428922
+      arcane_mote_particle_4: 2730679716196018044
+      arcane_mote_particle_5: -7766115989783822633
+      arcane_mote_particle_6: 123667464502338245
+      arcane_mote_particle_7: 1024176272801684494
+      arcane_mote_particle_8: 880588372029826715
+      arcane_mote_particle_9: -4896600860491813607
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

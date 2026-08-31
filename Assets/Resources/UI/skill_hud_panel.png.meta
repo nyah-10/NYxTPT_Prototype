@@ -1,0 +1,1222 @@
+fileFormatVersion: 2
+guid: 13ecff8ae20ee3f4fb74299243f1fed9
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7847487847531232870
+    second: skill_hud_panel_0
+  - first:
+      213: -3044836553390781994
+    second: skill_hud_panel_1
+  - first:
+      213: -690554218033659147
+    second: skill_hud_panel_2
+  - first:
+      213: -7195723562202503096
+    second: skill_hud_panel_3
+  - first:
+      213: -4223390137048493122
+    second: skill_hud_panel_4
+  - first:
+      213: 8233071011321585025
+    second: skill_hud_panel_5
+  - first:
+      213: 6168769061841488732
+    second: skill_hud_panel_6
+  - first:
+      213: -528510862157028371
+    second: skill_hud_panel_7
+  - first:
+      213: 2168269149477557925
+    second: skill_hud_panel_8
+  - first:
+      213: 1039125790715524820
+    second: skill_hud_panel_9
+  - first:
+      213: -1956631111450095431
+    second: skill_hud_panel_10
+  - first:
+      213: 1121961455329126241
+    second: skill_hud_panel_11
+  - first:
+      213: -3832045156751899749
+    second: skill_hud_panel_12
+  - first:
+      213: -3154071854696825297
+    second: skill_hud_panel_13
+  - first:
+      213: -6508689188609808931
+    second: skill_hud_panel_14
+  - first:
+      213: 5060524028570761289
+    second: skill_hud_panel_15
+  - first:
+      213: -6683115413677913488
+    second: skill_hud_panel_16
+  - first:
+      213: -4929186824320109884
+    second: skill_hud_panel_17
+  - first:
+      213: 5079048195198030077
+    second: skill_hud_panel_18
+  - first:
+      213: 6871319273957822105
+    second: skill_hud_panel_19
+  - first:
+      213: 1636772133524966835
+    second: skill_hud_panel_20
+  - first:
+      213: -4965415646844046303
+    second: skill_hud_panel_21
+  - first:
+      213: -1765330439598781331
+    second: skill_hud_panel_22
+  - first:
+      213: 4104109377788688228
+    second: skill_hud_panel_23
+  - first:
+      213: -497758302925755137
+    second: skill_hud_panel_24
+  - first:
+      213: 8901668941799111557
+    second: skill_hud_panel_25
+  - first:
+      213: 4427630554882654324
+    second: skill_hud_panel_26
+  - first:
+      213: -8647377999128838493
+    second: skill_hud_panel_27
+  - first:
+      213: 1037209328728831802
+    second: skill_hud_panel_28
+  - first:
+      213: 7851308290763899410
+    second: skill_hud_panel_29
+  - first:
+      213: 430703616493836238
+    second: skill_hud_panel_30
+  - first:
+      213: -6056827655890475749
+    second: skill_hud_panel_31
+  - first:
+      213: -4486498800468204799
+    second: skill_hud_panel_32
+  - first:
+      213: -7606064019765752588
+    second: skill_hud_panel_33
+  - first:
+      213: -7898043368928423644
+    second: skill_hud_panel_34
+  - first:
+      213: -2438020499817603853
+    second: skill_hud_panel_35
+  - first:
+      213: 872404377273968657
+    second: skill_hud_panel_36
+  - first:
+      213: 7594573697117427817
+    second: skill_hud_panel_37
+  - first:
+      213: -6307423087234311725
+    second: skill_hud_panel_38
+  - first:
+      213: -3932959419571715281
+    second: skill_hud_panel_39
+  - first:
+      213: -8430333255577516011
+    second: skill_hud_panel_40
+  - first:
+      213: 288666472287658365
+    second: skill_hud_panel_41
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 100
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: skill_hud_panel_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 2172
+        height: 706
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66e3b4b9e90e7ec60800000000000000
+      internalID: 7847487847531232870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_1
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 47
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d9840479419eb5d0800000000000000
+      internalID: -3044836553390781994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_2
+      rect:
+        serializedVersion: 2
+        x: 368
+        y: 21
+        width: 15
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f2c4ffe898aa66f0800000000000000
+      internalID: -690554218033659147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_3
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 95
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 848e2057b87a32c90800000000000000
+      internalID: -7195723562202503096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_4
+      rect:
+        serializedVersion: 2
+        x: 509
+        y: 19
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb3165dfb018365c0800000000000000
+      internalID: -4223390137048493122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_5
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 15
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18d9360d67eb14270800000000000000
+      internalID: 8233071011321585025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_6
+      rect:
+        serializedVersion: 2
+        x: 583
+        y: 15
+        width: 64
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5b4b7837cedb9550800000000000000
+      internalID: 6168769061841488732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_7
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 87
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de3e139cb2a5aa8f0800000000000000
+      internalID: -528510862157028371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_8
+      rect:
+        serializedVersion: 2
+        x: 619
+        y: 63
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a65c00bd4d371e10800000000000000
+      internalID: 2168269149477557925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_9
+      rect:
+        serializedVersion: 2
+        x: 631
+        y: 51
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d6bb80b667bb6e00800000000000000
+      internalID: 1039125790715524820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_10
+      rect:
+        serializedVersion: 2
+        x: 633
+        y: 33
+        width: 10
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b01a8dee56a8d4e0800000000000000
+      internalID: -1956631111450095431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_11
+      rect:
+        serializedVersion: 2
+        x: 676
+        y: 31
+        width: 15
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 167a29ccff1029f00800000000000000
+      internalID: 1121961455329126241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_12
+      rect:
+        serializedVersion: 2
+        x: 722
+        y: 31
+        width: 35
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b930c84ab37d1dac0800000000000000
+      internalID: -3832045156751899749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_13
+      rect:
+        serializedVersion: 2
+        x: 738
+        y: 47
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2efcb0fb5c7a34d0800000000000000
+      internalID: -3154071854696825297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_14
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 66
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd5ac7fdaad7ca5a0800000000000000
+      internalID: -6508689188609808931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_15
+      rect:
+        serializedVersion: 2
+        x: 875
+        y: 37
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 948f94ccac79a3640800000000000000
+      internalID: 5060524028570761289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_16
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 71
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07a4ace90fdc043a0800000000000000
+      internalID: -6683115413677913488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_17
+      rect:
+        serializedVersion: 2
+        x: 1412
+        y: 45
+        width: 22
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c23dd003b2089bb0800000000000000
+      internalID: -4929186824320109884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_18
+      rect:
+        serializedVersion: 2
+        x: 1422
+        y: 31
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df01edf6c676c7640800000000000000
+      internalID: 5079048195198030077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_19
+      rect:
+        serializedVersion: 2
+        x: 1454
+        y: 31
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99e0d8e4974db5f50800000000000000
+      internalID: 6871319273957822105
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_20
+      rect:
+        serializedVersion: 2
+        x: 1462
+        y: 17
+        width: 62
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3bd830d559bf6b610800000000000000
+      internalID: 1636772133524966835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_21
+      rect:
+        serializedVersion: 2
+        x: 1480
+        y: 77
+        width: 15
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 124b1bfe6cc471bb0800000000000000
+      internalID: -4965415646844046303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_22
+      rect:
+        serializedVersion: 2
+        x: 1518
+        y: 85
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6cc78c71594087e0800000000000000
+      internalID: -1765330439598781331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_23
+      rect:
+        serializedVersion: 2
+        x: 1520
+        y: 31
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 467b17e0cb9b4f830800000000000000
+      internalID: 4104109377788688228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_24
+      rect:
+        serializedVersion: 2
+        x: 1524
+        y: 23
+        width: 20
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffceb12f57b9719f0800000000000000
+      internalID: -497758302925755137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_25
+      rect:
+        serializedVersion: 2
+        x: 1528
+        y: 79
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58b30105db4198b70800000000000000
+      internalID: 8901668941799111557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_26
+      rect:
+        serializedVersion: 2
+        x: 1534
+        y: 65
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4704274f78a127d30800000000000000
+      internalID: 4427630554882654324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_27
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 79
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3aeb56b86875ef780800000000000000
+      internalID: -8647377999128838493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_28
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 47
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a377a9c9368e46e00800000000000000
+      internalID: 1037209328728831802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_29
+      rect:
+        serializedVersion: 2
+        x: 1537
+        y: 15
+        width: 73
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 212cf0dda4375fc60800000000000000
+      internalID: 7851308290763899410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_30
+      rect:
+        serializedVersion: 2
+        x: 1542
+        y: 48
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec7579048aa2af500800000000000000
+      internalID: 430703616493836238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_31
+      rect:
+        serializedVersion: 2
+        x: 1559
+        y: 76
+        width: 25
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b15e2e06653d1fba0800000000000000
+      internalID: -6056827655890475749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_32
+      rect:
+        serializedVersion: 2
+        x: 1583
+        y: 79
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10360e88c11ccb1c0800000000000000
+      internalID: -4486498800468204799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_33
+      rect:
+        serializedVersion: 2
+        x: 1589
+        y: 51
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fc8bfa9215d17690800000000000000
+      internalID: -7606064019765752588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_34
+      rect:
+        serializedVersion: 2
+        x: 1600
+        y: 47
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 421546ec663846290800000000000000
+      internalID: -7898043368928423644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_35
+      rect:
+        serializedVersion: 2
+        x: 1607
+        y: 17
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fc5049c5496a2ed0800000000000000
+      internalID: -2438020499817603853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_36
+      rect:
+        serializedVersion: 2
+        x: 1631
+        y: 15
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11829efa8276b1c00800000000000000
+      internalID: 872404377273968657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_37
+      rect:
+        serializedVersion: 2
+        x: 1649
+        y: 17
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 968953d2a88556960800000000000000
+      internalID: 7594573697117427817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_38
+      rect:
+        serializedVersion: 2
+        x: 1657
+        y: 2
+        width: 52
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d91d4dce188778a0800000000000000
+      internalID: -6307423087234311725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_39
+      rect:
+        serializedVersion: 2
+        x: 1711
+        y: 13
+        width: 32
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f23c660ee325b69c0800000000000000
+      internalID: -3932959419571715281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_40
+      rect:
+        serializedVersion: 2
+        x: 1894
+        y: 97
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 518c323e190710b80800000000000000
+      internalID: -8430333255577516011
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_hud_panel_41
+      rect:
+        serializedVersion: 2
+        x: 1900
+        y: 100
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d71654b80ac810400800000000000000
+      internalID: 288666472287658365
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      skill_hud_panel_0: 7847487847531232870
+      skill_hud_panel_1: -3044836553390781994
+      skill_hud_panel_10: -1956631111450095431
+      skill_hud_panel_11: 1121961455329126241
+      skill_hud_panel_12: -3832045156751899749
+      skill_hud_panel_13: -3154071854696825297
+      skill_hud_panel_14: -6508689188609808931
+      skill_hud_panel_15: 5060524028570761289
+      skill_hud_panel_16: -6683115413677913488
+      skill_hud_panel_17: -4929186824320109884
+      skill_hud_panel_18: 5079048195198030077
+      skill_hud_panel_19: 6871319273957822105
+      skill_hud_panel_2: -690554218033659147
+      skill_hud_panel_20: 1636772133524966835
+      skill_hud_panel_21: -4965415646844046303
+      skill_hud_panel_22: -1765330439598781331
+      skill_hud_panel_23: 4104109377788688228
+      skill_hud_panel_24: -497758302925755137
+      skill_hud_panel_25: 8901668941799111557
+      skill_hud_panel_26: 4427630554882654324
+      skill_hud_panel_27: -8647377999128838493
+      skill_hud_panel_28: 1037209328728831802
+      skill_hud_panel_29: 7851308290763899410
+      skill_hud_panel_3: -7195723562202503096
+      skill_hud_panel_30: 430703616493836238
+      skill_hud_panel_31: -6056827655890475749
+      skill_hud_panel_32: -4486498800468204799
+      skill_hud_panel_33: -7606064019765752588
+      skill_hud_panel_34: -7898043368928423644
+      skill_hud_panel_35: -2438020499817603853
+      skill_hud_panel_36: 872404377273968657
+      skill_hud_panel_37: 7594573697117427817
+      skill_hud_panel_38: -6307423087234311725
+      skill_hud_panel_39: -3932959419571715281
+      skill_hud_panel_4: -4223390137048493122
+      skill_hud_panel_40: -8430333255577516011
+      skill_hud_panel_41: 288666472287658365
+      skill_hud_panel_5: 8233071011321585025
+      skill_hud_panel_6: 6168769061841488732
+      skill_hud_panel_7: -528510862157028371
+      skill_hud_panel_8: 2168269149477557925
+      skill_hud_panel_9: 1039125790715524820
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
