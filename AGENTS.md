@@ -4,6 +4,7 @@
 
 ## 자동 Git 커밋
 
+- 이 프로젝트의 승인된 push 대상은 `origin`의 `git@github.com:nyah-10/NYxTPT_Prototype.git`입니다. push 전에 `git remote get-url origin`으로 정확히 일치하는지 확인하고, 일치하면 현재 추적 브랜치에 일반 push를 수행합니다. 다른 주소이거나 `origin`이 없으면 push하지 말고 사용자에게 알립니다.
 - Windows에서 `git` 명령이 PATH에서 발견되지 않으면 작업을 포기하지 말고, `C:\Program Files\Git\cmd\git.exe`, `%LOCALAPPDATA%\Programs\Git\cmd\git.exe`, `%LOCALAPPDATA%\Programs\MinGit\cmd\git.exe` 순서로 확인하여 사용합니다.
 - Codex가 파일을 생성하거나 수정하는 작업을 성공적으로 완료하고 필요한 검증까지 통과하면, 사용자에게 결과를 전달하기 전에 자동으로 Git 커밋을 생성합니다.
 - 커밋에는 현재 작업에서 Codex가 생성하거나 수정한 파일만 포함합니다. 작업 시작 전에 존재하던 사용자 변경이나 현재 작업과 무관한 변경은 staging하거나 커밋하지 않습니다.
