@@ -2,6 +2,7 @@
 
 ## Development environment files
 
+- `AGENTS.md`: Defines project-wide Codex behavior, including automatic task-scoped commits after successful file-changing work while requiring explicit approval for push.
 - `.gitignore`: Excludes Unity-generated caches, build output, IDE state, and temporary files from Git while retaining source assets, packages, and project settings.
 - `.stignore`: Excludes the same machine-local Unity/IDE output plus `.git`, so each PC keeps independent Git metadata and exchanges commits through GitHub.
 
