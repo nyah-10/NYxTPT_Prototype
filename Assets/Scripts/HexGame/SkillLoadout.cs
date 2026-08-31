@@ -169,7 +169,7 @@ public class SkillLoadout : MonoBehaviour
 
     private static UnitStats FindUnitAt(Vector2Int coordinate)
     {
-        foreach (UnitStats stats in FindObjectsByType<UnitStats>(FindObjectsSortMode.None))
+        foreach (UnitStats stats in FindObjectsByType<UnitStats>())
         {
             PlayerController player = stats.GetComponent<PlayerController>();
             EnemyController enemy = stats.GetComponent<EnemyController>();

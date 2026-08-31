@@ -17,9 +17,9 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         if (gridManager == null)
-            gridManager = FindFirstObjectByType<HexGridManager>();
+            gridManager = FindAnyObjectByType<HexGridManager>();
         if (turnManager == null)
-            turnManager = FindFirstObjectByType<TurnManager>();
+            turnManager = FindAnyObjectByType<TurnManager>();
 
         if (gridManager == null || !gridManager.TryGetTile(startCoordinate, out HexTile tile))
         {

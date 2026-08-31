@@ -11,6 +11,7 @@ public class TurnManager : MonoBehaviour
         public MonoBehaviour Combatant;
         public int Initiative;
         public bool IsPlayer;
+        public int RegistrationOrder;
     }
 
     public PlayerController player;
@@ -27,11 +28,12 @@ public class TurnManager : MonoBehaviour
     private UnitStats playerStats;
     private SkillLoadout playerSkills;
     private int queueIndex;
+    private int registrationOrder;
 
     private void Start()
     {
         RegisterCombatants();
-        if (FindFirstObjectByType<InitiativeOrderUI>() == null)
+        if (FindAnyObjectByType<InitiativeOrderUI>() == null)
             new GameObject("Initiative Order UI").AddComponent<InitiativeOrderUI>();
         StartCoroutine(BeginFirstRound());
     }
@@ -44,7 +46,7 @@ public class TurnManager : MonoBehaviour
 
     private void RegisterCombatants()
     {
-        if (player == null) player = FindFirstObjectByType<PlayerController>();
+        if (player == null) player = FindAnyObjectByType<PlayerController>();
         if (player != null)
         {
             player.TryGetComponent(out playerStats);
@@ -52,7 +54,7 @@ public class TurnManager : MonoBehaviour
             if (playerStats != null) playerStats.Died += _ => EndBattle(false);
         }
 
-        foreach (EnemyController activeEnemy in FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
+        foreach (EnemyController activeEnemy in FindObjectsByType<EnemyController>())
         {
             enemies.Add(activeEnemy);
             if (activeEnemy.TryGetComponent(out UnitStats stats)) stats.Died += HandleEnemyDeath;
@@ -87,12 +89,12 @@ public class TurnManager : MonoBehaviour
         Phase = RoundPhase.InitiativeReveal;
         executionQueue.Clear();
         if (player != null && playerStats != null && !playerStats.IsDead)
-            executionQueue.Add(new QueueEntry { Combatant = player, Initiative = playerInitiative, IsPlayer = true });
+            executionQueue.Add(new QueueEntry { Combatant = player, Initiative = playerInitiative, IsPlayer = true, RegistrationOrder = 0 });
 
         foreach (EnemyController activeEnemy in enemies)
         {
             if (activeEnemy == null || !activeEnemy.TryGetComponent(out UnitStats stats) || stats.IsDead) continue;
-            executionQueue.Add(new QueueEntry { Combatant = activeEnemy, Initiative = activeEnemy.CurrentCardInitiative });
+            executionQueue.Add(new QueueEntry { Combatant = activeEnemy, Initiative = activeEnemy.CurrentCardInitiative, RegistrationOrder = ++registrationOrder });
         }
 
         // A deterministic player-first tie break prevents confusing order changes.
@@ -101,7 +103,7 @@ public class TurnManager : MonoBehaviour
             int byInitiative = a.Initiative.CompareTo(b.Initiative);
             if (byInitiative != 0) return byInitiative;
             if (a.IsPlayer != b.IsPlayer) return a.IsPlayer ? -1 : 1;
-            return a.Combatant.GetInstanceID().CompareTo(b.Combatant.GetInstanceID());
+            return a.RegistrationOrder.CompareTo(b.RegistrationOrder);
         });
 
         initiativeOrder.Clear();
@@ -140,7 +142,7 @@ public class TurnManager : MonoBehaviour
         if (entry.IsPlayer)
         {
             if (playerSkills == null || !playerSkills.HasPlannedActions) { ExecuteNextQueueEntry(); return; }
-            playerSkills.ExecutePlan(FindFirstObjectByType<HexGridManager>());
+            playerSkills.ExecutePlan(FindAnyObjectByType<HexGridManager>());
             StartCoroutine(WaitForPlayerActions());
             return;
         }

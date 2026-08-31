@@ -10,7 +10,7 @@ public class InitiativeOrderUI : MonoBehaviour
 
     private void Start()
     {
-        turnManager = FindFirstObjectByType<TurnManager>();
+        turnManager = FindAnyObjectByType<TurnManager>();
         CreateBar();
     }
 

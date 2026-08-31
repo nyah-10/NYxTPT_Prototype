@@ -39,7 +39,7 @@ public class EnemyController : MonoBehaviour
     private void Start()
     {
         if (gridManager == null)
-            gridManager = FindFirstObjectByType<HexGridManager>();
+            gridManager = FindAnyObjectByType<HexGridManager>();
 
         if (gridManager != null && gridManager.TryGetTile(startCoordinate, out HexTile startTile))
         {

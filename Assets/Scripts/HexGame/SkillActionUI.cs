@@ -38,8 +38,8 @@ public class SkillActionUI : MonoBehaviour
 
     private void Start()
     {
-        if (playerSkills == null) playerSkills = FindFirstObjectByType<SkillLoadout>();
-        if (gridManager == null) gridManager = FindFirstObjectByType<HexGridManager>();
+        if (playerSkills == null) playerSkills = FindAnyObjectByType<SkillLoadout>();
+        if (gridManager == null) gridManager = FindAnyObjectByType<HexGridManager>();
         EnsureEventSystem();
         CreateHud();
     }
@@ -247,7 +247,7 @@ public class SkillActionUI : MonoBehaviour
     private bool HasEnemyInRange(int range)
     {
         Vector2Int source = playerSkills.GetPlanningSource();
-        foreach (EnemyController enemy in FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
+        foreach (EnemyController enemy in FindObjectsByType<EnemyController>())
         {
             UnitStats stats = enemy.GetComponent<UnitStats>();
             if ((stats == null || stats.CurrentHP > 0) && HexGridManager.HexDistance(source, enemy.CurrentCoordinate) <= range)
@@ -456,7 +456,7 @@ public class SkillActionUI : MonoBehaviour
 
     private static void EnsureEventSystem()
     {
-        if (FindFirstObjectByType<EventSystem>() == null)
+        if (FindAnyObjectByType<EventSystem>() == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
     }
 }
