@@ -169,7 +169,7 @@ public class SkillActionUI : MonoBehaviour
 
     private void Confirm()
     {
-        if (selectedSkill == null && playerSkills.HasCompletePlan) { ClearGhost(); gridManager.ClearHighlights(); status.text = "카드를 공개합니다"; detail.text = "선제도가 낮은 카드부터 행동합니다."; playerSkills.GetComponent<PlayerController>().turnManager.SubmitPlayerActionCard(); RefreshStates(); return; }
+        if (selectedSkill == null && playerSkills.HasCompletePlan) { ClearGhost(); gridManager.ClearHighlights(); status.text = "카드를 공개합니다"; detail.text = "선제도가 낮은 카드부터 행동합니다."; playerSkills.GetComponent<PlayerController>().turnManager.SubmitPlayerActionCard(playerSkills); RefreshStates(); return; }
         if (selectedSkill == null || selectedTarget == InvalidTarget) { status.text = selectedSkill == null ? "먼저 행동 카드를 선택하세요." : "강조된 타일에서 대상을 선택하세요."; return; }
         SkillDefinition committed = selectedSkill; Vector2Int target = selectedTarget;
         if (!playerSkills.Plan(committed, target, gridManager)) { status.text = "이 대상에게는 카드를 사용할 수 없습니다."; return; }
@@ -180,17 +180,17 @@ public class SkillActionUI : MonoBehaviour
     private void EndTurn()
     {
         PlayerController player = playerSkills == null ? null : playerSkills.GetComponent<PlayerController>();
-        if (player == null || player.turnManager == null || !player.turnManager.IsPlayerTurn || playerSkills.IsExecutingPlan) return;
+        if (player == null || player.turnManager == null || !player.turnManager.CanPlayerAct(player) || playerSkills.IsExecutingPlan) return;
         selectedSkill = null; selectedTarget = InvalidTarget; ClearGhost(); gridManager.ClearHighlights();
         status.text = playerSkills.HasPlannedActions ? "예약한 카드를 공개합니다" : "행동 없이 턴을 종료합니다"; detail.text = "몬스터 카드와 함께 행동 순서를 결정합니다.";
-        player.turnManager.SubmitPlayerActionCard(); RefreshStates();
+        player.turnManager.SubmitPlayerActionCard(playerSkills); RefreshStates();
     }
 
     private void RefreshStates()
     {
         foreach (SkillCardView card in cards) card.SetState(playerSkills != null && playerSkills.CanUse(card.Skill), card.Skill == selectedSkill);
         if (confirmButton != null) confirmButton.interactable = selectedSkill != null && selectedTarget != InvalidTarget || selectedSkill == null && playerSkills.HasCompletePlan;
-        if (endTurnButton != null) { PlayerController player = playerSkills == null ? null : playerSkills.GetComponent<PlayerController>(); endTurnButton.interactable = player != null && player.turnManager != null && player.turnManager.IsPlayerTurn && !playerSkills.IsExecutingPlan; }
+        if (endTurnButton != null) { PlayerController player = playerSkills == null ? null : playerSkills.GetComponent<PlayerController>(); endTurnButton.interactable = player != null && player.turnManager != null && player.turnManager.CanPlayerAct(player) && !playerSkills.IsExecutingPlan; }
     }
 
     private static bool HasMovement(SkillDefinition skill) { if (skill?.effects == null) return false; foreach (SkillEffect effect in skill.effects) if (effect.type == SkillEffectType.Move || effect.type == SkillEffectType.Jump) return true; return false; }

@@ -3,6 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum RoundPhase { CardSelection, InitiativeReveal, Execution, BattleEnded }
+public enum QueueEntryState { Pending, Acting, Completed, SkippedDead, SkippedDisabled }
+
+public readonly struct TurnQueueItem
+{
+    public readonly MonoBehaviour Combatant;
+    public readonly int Initiative;
+    public readonly bool IsPlayer;
+    public readonly QueueEntryState State;
+
+    public TurnQueueItem(MonoBehaviour combatant, int initiative, bool isPlayer, QueueEntryState state)
+    {
+        Combatant = combatant;
+        Initiative = initiative;
+        IsPlayer = isPlayer;
+        State = state;
+    }
+}
 
 public class TurnManager : MonoBehaviour
 {
@@ -12,47 +29,82 @@ public class TurnManager : MonoBehaviour
         public int Initiative;
         public bool IsPlayer;
         public int RegistrationOrder;
+        public QueueEntryState State;
     }
 
     public PlayerController player;
     public EnemyController enemy;
     public RoundPhase Phase { get; private set; }
-    public bool IsPlayerTurn => Phase == RoundPhase.CardSelection || CurrentCombatant == player;
+    public bool IsPlayerTurn => Phase == RoundPhase.CardSelection || CurrentCombatant is PlayerController;
+    public bool CanPlayerAct(PlayerController activePlayer) => Phase == RoundPhase.CardSelection || CurrentCombatant == activePlayer;
     public MonoBehaviour CurrentCombatant { get; private set; }
     public int RemainingEnemyCount { get; private set; }
     public IReadOnlyList<string> InitiativeOrder => initiativeOrder;
+    public event System.Action QueueChanged;
+    public event System.Action<string> FeedbackRequested;
+
+    public void ReportFeedback(string message) => FeedbackRequested?.Invoke(message);
 
     private readonly List<EnemyController> enemies = new();
+    private readonly List<PlayerController> players = new();
+    private readonly HashSet<SkillLoadout> submittedPlayers = new();
     private readonly List<QueueEntry> executionQueue = new();
     private readonly List<string> initiativeOrder = new();
-    private UnitStats playerStats;
     private SkillLoadout playerSkills;
     private int queueIndex;
     private int registrationOrder;
 
+    public List<TurnQueueItem> GetTurnQueueSnapshot()
+    {
+        List<TurnQueueItem> snapshot = new(executionQueue.Count);
+        foreach (QueueEntry entry in executionQueue)
+            snapshot.Add(new TurnQueueItem(entry.Combatant, entry.Initiative, entry.IsPlayer, entry.State));
+        return snapshot;
+    }
+
     private void Start()
     {
-        RegisterCombatants();
         if (FindAnyObjectByType<InitiativeOrderUI>() == null)
             new GameObject("Initiative Order UI").AddComponent<InitiativeOrderUI>();
+        BeginCombat();
+    }
+
+    public void BeginCombat()
+    {
+        StopAllCoroutines();
+        UnregisterCombatants();
+        executionQueue.Clear();
+        initiativeOrder.Clear();
+        submittedPlayers.Clear();
+        queueIndex = 0;
+        registrationOrder = 0;
+        CurrentCombatant = null;
+        RegisterCombatants();
+        playerSkills?.ClearPlan();
         StartCoroutine(BeginFirstRound());
     }
 
-    private IEnumerator BeginFirstRound()
+    private IEnumerator BeginFirstRound() { yield return null; BeginCardSelection(); }
+
+    private void UnregisterCombatants()
     {
-        yield return null;
-        BeginCardSelection();
+        foreach (PlayerController activePlayer in players)
+            if (activePlayer != null && activePlayer.TryGetComponent(out UnitStats stats)) stats.Died -= HandlePlayerDeath;
+        players.Clear();
+        foreach (EnemyController activeEnemy in enemies)
+            if (activeEnemy != null && activeEnemy.TryGetComponent(out UnitStats stats)) stats.Died -= HandleEnemyDeath;
+        enemies.Clear();
     }
 
     private void RegisterCombatants()
     {
-        if (player == null) player = FindAnyObjectByType<PlayerController>();
-        if (player != null)
+        foreach (PlayerController activePlayer in FindObjectsByType<PlayerController>())
         {
-            player.TryGetComponent(out playerStats);
-            player.TryGetComponent(out playerSkills);
-            if (playerStats != null) playerStats.Died += _ => EndBattle(false);
+            players.Add(activePlayer);
+            if (activePlayer.TryGetComponent(out UnitStats stats)) stats.Died += HandlePlayerDeath;
         }
+        if (player == null && players.Count > 0) player = players[0];
+        if (player != null) player.TryGetComponent(out playerSkills);
 
         foreach (EnemyController activeEnemy in FindObjectsByType<EnemyController>())
         {
@@ -69,32 +121,54 @@ public class TurnManager : MonoBehaviour
         CurrentCombatant = null;
         executionQueue.Clear();
         initiativeOrder.Clear();
-        playerSkills?.ClearPlan();
-        if (player != null && player.TryGetComponent(out ActionController actions)) actions.StartTurn();
+        submittedPlayers.Clear();
+        foreach (PlayerController activePlayer in players)
+        {
+            if (activePlayer == null || !activePlayer.TryGetComponent(out UnitStats stats) || stats.IsDead) continue;
+            activePlayer.GetComponent<SkillLoadout>()?.ClearPlan();
+            activePlayer.GetComponent<ActionController>()?.StartTurn();
+        }
         foreach (EnemyController activeEnemy in enemies)
             if (activeEnemy != null && activeEnemy.TryGetComponent(out UnitStats stats) && !stats.IsDead)
                 activeEnemy.PrepareRoundAction();
+        FeedbackRequested?.Invoke("플레이어 카드를 선택하세요");
+        QueueChanged?.Invoke();
         Debug.Log("Card selection: choose the player's actions. Monster cards are ready to reveal.");
     }
 
-    public void SubmitPlayerActionCard()
+    public void SubmitPlayerActionCard() => SubmitPlayerActionCard(playerSkills);
+
+    public void SubmitPlayerActionCard(SkillLoadout submittingLoadout)
     {
         if (Phase != RoundPhase.CardSelection) return;
-        BuildInitiativeQueue(playerSkills == null ? 99 : playerSkills.GetPlannedInitiative());
+        if (submittingLoadout != null) submittedPlayers.Add(submittingLoadout);
+        int livingPlayers = 0;
+        foreach (PlayerController activePlayer in players)
+            if (activePlayer != null && activePlayer.TryGetComponent(out UnitStats stats) && !stats.IsDead) livingPlayers++;
+        if (submittedPlayers.Count < livingPlayers)
+        {
+            FeedbackRequested?.Invoke($"카드 선택 대기 중 ({submittedPlayers.Count}/{livingPlayers})");
+            return;
+        }
+        BuildInitiativeQueue();
         StartCoroutine(RevealAndExecute());
     }
 
-    private void BuildInitiativeQueue(int playerInitiative)
+    private void BuildInitiativeQueue()
     {
         Phase = RoundPhase.InitiativeReveal;
         executionQueue.Clear();
-        if (player != null && playerStats != null && !playerStats.IsDead)
-            executionQueue.Add(new QueueEntry { Combatant = player, Initiative = playerInitiative, IsPlayer = true, RegistrationOrder = 0 });
+        foreach (PlayerController activePlayer in players)
+        {
+            if (activePlayer == null || !activePlayer.TryGetComponent(out UnitStats stats) || stats.IsDead) continue;
+            SkillLoadout skills = activePlayer.GetComponent<SkillLoadout>();
+            executionQueue.Add(new QueueEntry { Combatant = activePlayer, Initiative = skills == null ? 99 : skills.GetPlannedInitiative(), IsPlayer = true, RegistrationOrder = ++registrationOrder, State = QueueEntryState.Pending });
+        }
 
         foreach (EnemyController activeEnemy in enemies)
         {
             if (activeEnemy == null || !activeEnemy.TryGetComponent(out UnitStats stats) || stats.IsDead) continue;
-            executionQueue.Add(new QueueEntry { Combatant = activeEnemy, Initiative = activeEnemy.CurrentCardInitiative, RegistrationOrder = ++registrationOrder });
+            executionQueue.Add(new QueueEntry { Combatant = activeEnemy, Initiative = activeEnemy.CurrentCardInitiative, RegistrationOrder = ++registrationOrder, State = QueueEntryState.Pending });
         }
 
         executionQueue.Sort(CompareQueueEntries);
@@ -102,6 +176,7 @@ public class TurnManager : MonoBehaviour
         initiativeOrder.Clear();
         foreach (QueueEntry entry in executionQueue)
             initiativeOrder.Add($"{entry.Combatant.name} {entry.Initiative}");
+        QueueChanged?.Invoke();
     }
 
     private static int CompareQueueEntries(QueueEntry a, QueueEntry b)
@@ -130,39 +205,63 @@ public class TurnManager : MonoBehaviour
         QueueEntry entry = executionQueue[queueIndex++];
         if (entry.Combatant == null || !entry.Combatant.TryGetComponent(out UnitStats stats) || stats.IsDead)
         {
+            entry.State = QueueEntryState.SkippedDead;
+            FeedbackRequested?.Invoke($"{entry.Combatant?.name ?? "유닛"}: 사망으로 턴 건너뜀");
+            QueueChanged?.Invoke();
             ExecuteNextQueueEntry();
             return;
         }
 
         CurrentCombatant = entry.Combatant;
+        entry.State = QueueEntryState.Acting;
+        FeedbackRequested?.Invoke($"{entry.Combatant.name}의 턴");
+        QueueChanged?.Invoke();
         if (stats.IsStunned)
         {
             stats.BeginTurn();
+            entry.State = QueueEntryState.SkippedDisabled;
+            FeedbackRequested?.Invoke($"{entry.Combatant.name}: 행동 불가로 턴 건너뜀");
+            QueueChanged?.Invoke();
             ExecuteNextQueueEntry();
             return;
         }
 
         if (entry.IsPlayer)
         {
-            if (playerSkills == null || !playerSkills.HasPlannedActions) { ExecuteNextQueueEntry(); return; }
-            playerSkills.ExecutePlan(FindAnyObjectByType<HexGridManager>());
-            StartCoroutine(WaitForPlayerActions());
+            SkillLoadout skills = entry.Combatant.GetComponent<SkillLoadout>();
+            if (skills == null || !skills.HasPlannedActions) { CompleteCurrentEntry(); ExecuteNextQueueEntry(); return; }
+            skills.ExecutePlan(FindAnyObjectByType<HexGridManager>());
+            StartCoroutine(WaitForPlayerActions(skills));
             return;
         }
 
         StartCoroutine(ExecuteEnemy((EnemyController)entry.Combatant));
     }
 
-    private IEnumerator WaitForPlayerActions()
+    private IEnumerator WaitForPlayerActions(SkillLoadout skills)
     {
-        yield return new WaitUntil(() => !playerSkills.IsExecutingPlan);
+        yield return new WaitUntil(() => skills == null || !skills.IsExecutingPlan);
+        CompleteCurrentEntry();
         ExecuteNextQueueEntry();
     }
 
     private IEnumerator ExecuteEnemy(EnemyController activeEnemy)
     {
-        if (player != null && playerStats != null && !playerStats.IsDead) yield return activeEnemy.TakeTurn(player);
+        PlayerController targetablePlayer = FindLivingPlayer();
+        if (targetablePlayer != null) yield return activeEnemy.TakeTurn(targetablePlayer);
+        CompleteCurrentEntry();
         ExecuteNextQueueEntry();
+    }
+
+    private void CompleteCurrentEntry()
+    {
+        foreach (QueueEntry entry in executionQueue)
+            if (entry.Combatant == CurrentCombatant && entry.State == QueueEntryState.Acting)
+            {
+                entry.State = QueueEntryState.Completed;
+                break;
+            }
+        QueueChanged?.Invoke();
     }
 
     // Kept for the existing HUD button; it now locks the selected card and starts the round.
@@ -173,6 +272,18 @@ public class TurnManager : MonoBehaviour
         stats.gameObject.SetActive(false);
         RemainingEnemyCount = CountLivingEnemies();
         if (RemainingEnemyCount == 0) EndBattle(true);
+    }
+
+    private void HandlePlayerDeath(UnitStats stats)
+    {
+        if (FindLivingPlayer() == null) EndBattle(false);
+    }
+
+    private PlayerController FindLivingPlayer()
+    {
+        foreach (PlayerController activePlayer in players)
+            if (activePlayer != null && activePlayer.TryGetComponent(out UnitStats stats) && !stats.IsDead) return activePlayer;
+        return null;
     }
 
     private int CountLivingEnemies()

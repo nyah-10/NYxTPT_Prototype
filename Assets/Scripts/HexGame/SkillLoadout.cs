@@ -146,7 +146,7 @@ public class SkillLoadout : MonoBehaviour
     }
 
     public bool CanUse(SkillDefinition skill) => skill != null && !IsExecutingPlan &&
-        (player.turnManager == null || player.turnManager.IsPlayerTurn) &&
+        (player.turnManager == null || player.turnManager.CanPlayerAct(player)) &&
         !HasPlannedSlot(skill.actionSlot) && (skill.actionSlot == SkillActionSlot.Main
         ? actionController.MainActionPoint > 0 : actionController.SubActionPoint > 0);
 

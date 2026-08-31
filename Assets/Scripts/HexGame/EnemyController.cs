@@ -133,6 +133,7 @@ public class EnemyController : MonoBehaviour
         if (target == null)
         {
             Debug.Log($"{name}: {card.id} - 타겟 없음");
+            FindAnyObjectByType<TurnManager>()?.ReportFeedback($"{name}: 타겟 없음");
             return;
         }
         target.TakeDamage(card.attackValue, GetComponent<UnitStats>());
