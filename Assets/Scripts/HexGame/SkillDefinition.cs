@@ -46,6 +46,8 @@ public class SkillDefinition : ScriptableObject
     [Tooltip("Resources-relative icon path used when no Sprite is assigned, for example SkillIcons/sword_strike.")]
     public string iconResourcePath;
     public SkillActionSlot actionSlot;
+    [Min(1), Tooltip("Lower values execute earlier during the round.")]
+    public int initiative = 50;
 
     [Header("Targeting")]
     [Min(0)] public int range = 1;

@@ -18,6 +18,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   iconResourcePath: SkillIcons/first_aid
   actionSlot: 1
+  initiative: 15
   range: 0
   areaRadius: 1
   targetsSelf: 1

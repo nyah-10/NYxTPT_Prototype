@@ -28,6 +28,14 @@ public class SkillLoadout : MonoBehaviour
     public bool HasCompletePlan => HasPlannedSlot(SkillActionSlot.Main) && HasPlannedSlot(SkillActionSlot.Sub);
     public bool IsExecutingPlan { get; private set; }
 
+    public int GetPlannedInitiative()
+    {
+        int initiative = int.MaxValue;
+        foreach (PlannedAction action in plannedActions)
+            initiative = Mathf.Min(initiative, Mathf.Max(1, action.Skill.initiative));
+        return initiative == int.MaxValue ? 99 : initiative;
+    }
+
     private void Awake()
     {
         actionController = GetComponent<ActionController>();
@@ -107,7 +115,9 @@ public class SkillLoadout : MonoBehaviour
         return false;
     }
 
-    public bool CanUse(SkillDefinition skill) => skill != null && !IsExecutingPlan && !HasPlannedSlot(skill.actionSlot) && (skill.actionSlot == SkillActionSlot.Main
+    public bool CanUse(SkillDefinition skill) => skill != null && !IsExecutingPlan &&
+        (player.turnManager == null || player.turnManager.IsPlayerTurn) &&
+        !HasPlannedSlot(skill.actionSlot) && (skill.actionSlot == SkillActionSlot.Main
         ? actionController.MainActionPoint > 0 : actionController.SubActionPoint > 0);
 
     private void CommitPlanned(PlannedAction action, HexGridManager grid)

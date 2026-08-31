@@ -17,6 +17,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   iconResourcePath: SkillIcons/leap
   actionSlot: 1
+  initiative: 60
   range: 3
   areaRadius: 0
   targetsSelf: 0

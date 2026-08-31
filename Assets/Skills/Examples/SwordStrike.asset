@@ -17,6 +17,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   iconResourcePath: SkillIcons/sword_strike
   actionSlot: 0
+  initiative: 20
   range: 1
   areaRadius: 0
   targetsSelf: 0

@@ -17,6 +17,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   iconResourcePath: SkillIcons/arcane_bolt
   actionSlot: 0
+  initiative: 45
   range: 3
   areaRadius: 0
   targetsSelf: 0

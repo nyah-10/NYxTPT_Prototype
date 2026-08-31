@@ -12,9 +12,23 @@ public class EnemyController : MonoBehaviour
     [Min(1)] public int closeAttackRange = 1;
     [Min(1)] public int closeAttackDamage = 4;
     [Range(1, 2)] public int moveRange = 2;
+    [Header("Round Action Cards")]
+    public int[] actionCardInitiatives = { 18, 32, 46, 61, 74, 89 };
 
     private Vector2Int currentCoordinate;
     public Vector2Int CurrentCoordinate => currentCoordinate;
+    public int CurrentCardInitiative { get; private set; } = 50;
+
+    public void PrepareRoundAction()
+    {
+        if (actionCardInitiatives == null || actionCardInitiatives.Length == 0)
+        {
+            CurrentCardInitiative = 50;
+            return;
+        }
+
+        CurrentCardInitiative = Mathf.Max(1, actionCardInitiatives[Random.Range(0, actionCardInitiatives.Length)]);
+    }
 
     private static readonly Vector2Int[] NeighborDirections =
     {

@@ -266,10 +266,9 @@ public class SkillActionUI : MonoBehaviour
         gridManager.ClearHighlights();
         if (playerSkills.HasPlannedActions)
         {
-            status.text = "예약된 행동을 실행한 뒤 턴을 종료합니다.";
-            detail.text = "행동 실행 중입니다.";
-            playerSkills.ExecutePlan(gridManager);
-            StartCoroutine(EndTurnAfterPlan(player));
+            status.text = "행동 카드를 공개하고 이니셔티브 순서를 정합니다.";
+            detail.text = "몬스터 카드도 함께 공개됩니다.";
+            player.turnManager.SubmitPlayerActionCard();
         }
         else
         {
@@ -287,20 +286,21 @@ public class SkillActionUI : MonoBehaviour
 
     private void FinishEndTurn(PlayerController player)
     {
-        status.text = "턴을 종료했습니다.";
-        detail.text = "적의 턴이 진행 중입니다.";
-        player.turnManager.EndPlayerTurn();
+        status.text = "행동 없이 카드를 공개합니다.";
+        detail.text = "몬스터 카드와 함께 이니셔티브 순서를 정합니다.";
+        player.turnManager.SubmitPlayerActionCard();
     }
 
     private void Confirm()
     {
         if (selectedSkill == null && playerSkills.HasCompletePlan)
         {
-            playerSkills.ExecutePlan(gridManager);
             ClearMovementGhost();
             gridManager.ClearHighlights();
-            status.text = "예약한 행동을 선택한 순서대로 실행했습니다.";
-            detail.text = "다른 행동을 선택하거나 턴을 종료하세요.";
+            status.text = "행동 카드를 공개하고 이니셔티브 큐를 만듭니다.";
+            detail.text = "낮은 이니셔티브부터 행동합니다.";
+            PlayerController player = playerSkills.GetComponent<PlayerController>();
+            player.turnManager.SubmitPlayerActionCard();
             RefreshCardStates();
             return;
         }
