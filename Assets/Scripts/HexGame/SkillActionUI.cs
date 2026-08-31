@@ -20,6 +20,7 @@ public class SkillActionUI : MonoBehaviour
     private Text status, detail;
     private Button confirmButton, endTurnButton;
     private GameObject movementGhost;
+    private SkillHandLayout handLayout;
 
     private void Start()
     {
@@ -81,16 +82,14 @@ public class SkillActionUI : MonoBehaviour
         status = Label(prompt.transform, "행동 카드를 선택하세요", new(0, 13), new(850, 28), 20, TextAnchor.MiddleCenter, Color.white, true);
         detail = Label(prompt.transform, "주 행동과 보조 행동을 한 장씩 예약할 수 있습니다.", new(0, -14), new(850, 22), 15, TextAnchor.MiddleCenter, new(.65f, .7f, .78f, 1f));
 
-        GameObject hand = UiObject("Card Hand", root.transform, typeof(Image), typeof(Outline));
+        GameObject hand = UiObject("Card Hand", root.transform, typeof(Image), typeof(Outline), typeof(SkillHandLayout));
         SetRect(hand, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 18), new(1430, 380));
         hand.GetComponent<Image>().color = new(.015f, .02f, .032f, .92f);
         hand.GetComponent<Outline>().effectColor = new(.25f, .34f, .45f, .42f);
+        handLayout = hand.GetComponent<SkillHandLayout>();
 
         List<SkillDefinition> skills = ConfiguredSkills();
-        const float width = 250, gap = 20;
-        float total = skills.Count * width + Mathf.Max(0, skills.Count - 1) * gap;
-        float start = -665 + (1060 - total) * .5f + width * .5f;
-        for (int i = 0; i < skills.Count; i++) CreateCard(hand.transform, skills[i], new(start + i * (width + gap), 18));
+        for (int i = 0; i < skills.Count; i++) CreateCard(hand.transform, skills[i]);
         CreateButtons(hand.transform);
         RefreshStates();
     }
@@ -109,15 +108,16 @@ public class SkillActionUI : MonoBehaviour
         foreach (SkillDefinition skill in source) if (skill != null) target.Add(skill);
     }
 
-    private void CreateCard(Transform parent, SkillDefinition skill, Vector2 position)
+    private void CreateCard(Transform parent, SkillDefinition skill)
     {
         Color accent = skill.actionSlot == SkillActionSlot.Main ? MainColor : SubColor;
-        GameObject go = UiObject($"Card - {skill.displayName}", parent, typeof(Image), typeof(Button), typeof(Outline), typeof(Shadow), typeof(SkillCardView));
-        RectTransform rect = SetRect(go, new(.5f, 0), new(.5f, 0), new(.5f, 0), position, new(250, 330));
+        GameObject go = UiObject($"Card - {skill.displayName}", parent, typeof(Canvas), typeof(GraphicRaycaster), typeof(Image), typeof(Button), typeof(Outline), typeof(Shadow), typeof(SkillCardView));
+        go.GetComponent<Canvas>().overrideSorting = true;
+        RectTransform rect = SetRect(go, new(.5f, 0), new(.5f, 0), new(.5f, 0), Vector2.zero, new(250, 330));
         Image background = go.GetComponent<Image>(); background.color = new(.095f, .105f, .13f, 1f);
         Outline outline = go.GetComponent<Outline>(); outline.effectColor = accent; outline.effectDistance = new(3, -3);
         Shadow shadow = go.GetComponent<Shadow>(); shadow.effectColor = new(0, 0, 0, .75f); shadow.effectDistance = new(10, -12);
-        Button button = go.GetComponent<Button>(); button.targetGraphic = background; button.transition = Selectable.Transition.None; button.onClick.AddListener(() => SelectSkill(skill));
+        Button button = go.GetComponent<Button>(); button.targetGraphic = background; button.transition = Selectable.Transition.None;
 
         Image header = UiObject("Header", rect, typeof(Image)).GetComponent<Image>();
         SetRect(header.gameObject, new(0, 1), new(1, 1), new(.5f, 1), Vector2.zero, new(0, 42)); header.color = accent;
@@ -137,7 +137,10 @@ public class SkillActionUI : MonoBehaviour
         SetRect(rule.gameObject, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 48), new(214, 2)); rule.color = new(accent.r, accent.g, accent.b, .6f);
         Label(rect, $"사거리  {skill.range}", new(-56, 22), new(100, 28), 14, TextAnchor.MiddleLeft, new(.7f, .75f, .82f, 1f));
         Label(rect, EffectSummary(skill), new(54, 22), new(112, 28), 14, TextAnchor.MiddleRight, accent, true);
-        SkillCardView view = go.GetComponent<SkillCardView>(); view.Initialize(skill, rect, background, outline, accent); cards.Add(view);
+        SkillCardView view = go.GetComponent<SkillCardView>();
+        view.Initialize(skill, rect, background, outline, accent, () => SelectSkill(skill));
+        cards.Add(view);
+        handLayout.Register(view);
     }
 
     private void CreateButtons(Transform parent)
