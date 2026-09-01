@@ -34,6 +34,8 @@ public class RoomTemplateEditorWindow : EditorWindow
         EditorGUILayout.PropertyField(serializedRoom.FindProperty("tags"), true);
         serializedRoom.ApplyModifiedProperties();
         brush = (TileData)EditorGUILayout.ObjectField("Tile Brush", brush, typeof(TileData), false);
+        if (brush == null)
+            EditorGUILayout.HelpBox("Select a TileData in Tile Brush before left-click painting. Right-click erase and Shift-click entry editing still work.", MessageType.Warning);
 
         Vector2Int size = room.GridSize;
         scroll = EditorGUILayout.BeginScrollView(scroll);
@@ -55,9 +57,8 @@ public class RoomTemplateEditorWindow : EditorWindow
         GUI.backgroundColor = entry ? new Color(1f, .65f, .15f) : TileColor(data);
         string label = data == null ? "·" : data.tileType.ToString()[..1];
         Rect cell = GUILayoutUtility.GetRect(34, 30, GUILayout.Width(34), GUILayout.Height(30));
-        GUI.Button(cell, new GUIContent(label, $"{coordinate}: {(data == null ? "Default" : data.name)}"));
         Event current = Event.current;
-        if (current.type == EventType.MouseDown && cell.Contains(current.mousePosition))
+        if (current.type == EventType.MouseDown && (current.button == 0 || current.button == 1) && cell.Contains(current.mousePosition))
         {
             Undo.RecordObject(room, "Paint Room Template");
             if (current.shift && room.IsEdge(coordinate))
@@ -69,6 +70,7 @@ public class RoomTemplateEditorWindow : EditorWindow
             current.Use();
             Repaint();
         }
+        GUI.Button(cell, new GUIContent(label, $"{coordinate}: {(data == null ? "Default" : data.name)}"));
         GUI.backgroundColor = old;
     }
 
