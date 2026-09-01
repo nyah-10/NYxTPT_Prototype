@@ -24,6 +24,8 @@ public sealed class SkillCardView : MonoBehaviour, IPointerEnterHandler, IPointe
     private bool hovered;
     private bool selected;
     private bool usable = true;
+    // A reserved card is not usable again, but must stay clickable to become the round's leading card.
+    private bool canSelectLeadingCard;
     private bool dragging;
     private bool movedDuringDrag;
 
@@ -52,6 +54,7 @@ public sealed class SkillCardView : MonoBehaviour, IPointerEnterHandler, IPointe
     public void SetState(bool canUse, bool isSelected, bool canSelectLeadingCard)
     {
         usable = canUse;
+        this.canSelectLeadingCard = canSelectLeadingCard;
         selected = isSelected;
         GetComponent<Button>().interactable = canUse || canSelectLeadingCard;
     }
@@ -60,7 +63,7 @@ public sealed class SkillCardView : MonoBehaviour, IPointerEnterHandler, IPointe
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (!usable || dragging) return;
+        if ((!usable && !canSelectLeadingCard) || dragging) return;
         hovered = true;
         hand?.SetHovered(this, true);
     }
@@ -74,7 +77,7 @@ public sealed class SkillCardView : MonoBehaviour, IPointerEnterHandler, IPointe
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (usable && !movedDuringDrag && eventData.button == PointerEventData.InputButton.Left) clicked?.Invoke();
+        if ((usable || canSelectLeadingCard) && !movedDuringDrag && eventData.button == PointerEventData.InputButton.Left) clicked?.Invoke();
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -122,9 +125,10 @@ public sealed class SkillCardView : MonoBehaviour, IPointerEnterHandler, IPointe
         rect.localRotation = Quaternion.Slerp(rect.localRotation, Quaternion.Euler(0, 0, desiredRotation), blend);
         dragTilt = Mathf.Lerp(dragTilt, 0f, blend);
 
-        Color target = usable ? selected ? new(.14f, .15f, .18f, 1f) : new(.095f, .105f, .13f, 1f) : new(.055f, .06f, .07f, .72f);
+        bool canInteract = usable || canSelectLeadingCard;
+        Color target = canInteract ? selected ? new(.14f, .15f, .18f, 1f) : new(.095f, .105f, .13f, 1f) : new(.055f, .06f, .07f, .72f);
         background.color = Color.Lerp(background.color, target, blend);
-        outline.effectColor = usable ? new(accent.r, accent.g, accent.b, selected ? 1f : hovered ? .9f : .62f) : new(.22f, .24f, .27f, .45f);
+        outline.effectColor = canInteract ? new(accent.r, accent.g, accent.b, selected ? 1f : hovered ? .9f : .62f) : new(.22f, .24f, .27f, .45f);
         // Nested card canvases must always render above the parent HUD background.
         if (cardCanvas != null) cardCanvas.sortingOrder = dragging ? 1200 : hovered || selected ? 1100 : 1000 + handIndex;
     }
