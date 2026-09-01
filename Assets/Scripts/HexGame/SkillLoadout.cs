@@ -64,16 +64,17 @@ public class SkillLoadout : MonoBehaviour
         if (!grid.TryGetTile(targetCoordinate, out _)) return false;
 
         Vector2Int source = player.CurrentCoordinate;
-        if (!skill.targetsSelf && HexGridManager.HexDistance(source, targetCoordinate) > skill.range)
+        if (!skill.targetsSelf && !grid.CanTarget(source, targetCoordinate, skill.range))
             return false;
 
         UnitStats target = FindUnitAt(targetCoordinate);
-        if ((skill.targetsEnemies || skill.targetsAllies) && target == null && !HasMovementEffect(skill))
+        bool terrainTarget = skill.canDestroyTerrain && grid.TryGetTile(targetCoordinate, out HexTile terrainTile) && terrainTile.IsDestructible;
+        if ((skill.targetsEnemies || skill.targetsAllies) && target == null && !terrainTarget && !HasMovementEffect(skill))
             return false;
 
         Spend(skill);
         foreach (SkillEffect effect in skill.effects)
-            ApplyEffect(effect, target, targetCoordinate, source, grid);
+            ApplyEffect(skill, effect, target, targetCoordinate, source, grid);
         PlayParticleEffect(skill, source, targetCoordinate, grid);
 
         return true;
@@ -120,7 +121,22 @@ public class SkillLoadout : MonoBehaviour
             }
             else if (RequiresExecutionTarget(action.Skill))
             {
-                List<UnitStats> candidates = FindValidTargets(action.Skill, player.CurrentCoordinate);
+                List<UnitStats> candidates = FindValidTargets(action.Skill, player.CurrentCoordinate, grid);
+                List<Vector2Int> terrainCandidates = FindDestructibleTerrain(action.Skill, player.CurrentCoordinate, grid);
+                if (terrainCandidates.Count > 0)
+                {
+                    List<Vector2Int> selectableCoordinates = CoordinatesOf(candidates);
+                    selectableCoordinates.AddRange(terrainCandidates);
+                    FeedbackRequested?.Invoke("공격할 대상 또는 지형을 선택하세요");
+                    grid.SetHighlights(selectableCoordinates, new Color(1f, .45f, .08f, .8f));
+                    Vector2Int? selectedCoordinate = null;
+                    yield return WaitForTileSelection(selectableCoordinates, result => selectedCoordinate = result);
+                    grid.ClearHighlights();
+                    if (!selectedCoordinate.HasValue) continue;
+                    targetCoordinate = selectedCoordinate.Value;
+                    CommitPlanned(action.Skill, targetCoordinate, grid);
+                    continue;
+                }
                 if (candidates.Count == 0)
                 {
                     FeedbackRequested?.Invoke("타겟 없음");
@@ -175,7 +191,7 @@ public class SkillLoadout : MonoBehaviour
         UnitStats target = FindUnitAt(targetCoordinate);
         Spend(skill);
         foreach (SkillEffect effect in skill.effects)
-            ApplyEffect(effect, target, targetCoordinate, source, grid);
+            ApplyEffect(skill, effect, target, targetCoordinate, source, grid);
         PlayParticleEffect(skill, source, targetCoordinate, grid);
     }
 
@@ -222,22 +238,32 @@ public class SkillLoadout : MonoBehaviour
 
     private static List<Vector2Int> FindValidDestinations(HexGridManager grid, Vector2Int source, int range)
     {
-        List<Vector2Int> result = grid.GetCoordinatesInRange(source, range);
+        List<Vector2Int> result = grid.GetReachableCoordinates(source, range);
         result.Remove(source);
         result.RemoveAll(coordinate => FindUnitAt(coordinate) != null);
         return result;
     }
 
-    private List<UnitStats> FindValidTargets(SkillDefinition skill, Vector2Int source)
+    private List<UnitStats> FindValidTargets(SkillDefinition skill, Vector2Int source, HexGridManager grid)
     {
         List<UnitStats> result = new();
         foreach (UnitStats stats in FindObjectsByType<UnitStats>())
         {
             if (stats == null || stats.IsDead || stats.gameObject == gameObject) continue;
             bool isEnemy = stats.GetComponent<EnemyController>() != null;
-            if (isEnemy != skill.targetsEnemies || HexGridManager.HexDistance(source, CoordinateOf(stats)) > skill.range) continue;
+            if (isEnemy != skill.targetsEnemies || !grid.CanTarget(source, CoordinateOf(stats), skill.range)) continue;
             result.Add(stats);
         }
+        return result;
+    }
+
+    private static List<Vector2Int> FindDestructibleTerrain(SkillDefinition skill, Vector2Int source, HexGridManager grid)
+    {
+        List<Vector2Int> result = new();
+        if (!skill.canDestroyTerrain) return result;
+        foreach (Vector2Int coordinate in grid.GetCoordinatesInRange(source, skill.range + 1))
+            if (grid.CanTarget(source, coordinate, skill.range) && grid.TryGetTile(coordinate, out HexTile tile) && tile.IsDestructible)
+                result.Add(coordinate);
         return result;
     }
 
@@ -270,11 +296,14 @@ public class SkillLoadout : MonoBehaviour
         SkillParticleEffects.Play(skill, sourceTile.transform.position, targetTile.transform.position);
     }
 
-    private void ApplyEffect(SkillEffect effect, UnitStats target, Vector2Int targetCoordinate, Vector2Int source, HexGridManager grid)
+    private void ApplyEffect(SkillDefinition skill, SkillEffect effect, UnitStats target, Vector2Int targetCoordinate, Vector2Int source, HexGridManager grid)
     {
         switch (effect.type)
         {
-            case SkillEffectType.Damage: target?.TakeDamage(effect.value, GetComponent<UnitStats>()); break;
+            case SkillEffectType.Damage:
+                if (target != null) target.TakeDamage(effect.value, GetComponent<UnitStats>());
+                else if (skill.canDestroyTerrain && grid.TryGetTile(targetCoordinate, out HexTile terrain)) terrain.TakeTerrainDamage(effect.value);
+                break;
             case SkillEffectType.Heal: (target ?? GetComponent<UnitStats>())?.RestoreHealth(effect.value); break;
             case SkillEffectType.Shield: (target ?? GetComponent<UnitStats>())?.AddShield(effect.value, effect.duration); break;
             case SkillEffectType.Stun: target?.AddStun(effect.duration); break;
@@ -315,7 +344,7 @@ public class SkillLoadout : MonoBehaviour
         EnemyController enemy = target.GetComponent<EnemyController>();
         Vector2Int start = player != null ? player.CurrentCoordinate : enemy.CurrentCoordinate;
         Vector2Int destination = start + direction * distance;
-        if (grid.TryGetTile(destination, out _))
+        if (grid.TryGetTile(destination, out HexTile destinationTile) && !destinationTile.BlocksMovement)
         {
             if (player != null) player.TryMoveTo(destination);
             else enemy.ForceMoveTo(destination);

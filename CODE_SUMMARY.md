@@ -8,6 +8,7 @@
 
 ## Runtime scripts
 
+- `Assets/Scripts/HexGame/TileData.cs`: Defines extensible terrain ScriptableObjects (type, movement cost, LOS/movement blocking, elevation, enter effects, trigger persistence, and destructible-wall HP/fallback terrain).
 - `Assets/Scripts/HexGame/HexGridManager.cs`: Generates and stores the axial-coordinate hex grid. It preserves the `HexTile` prefab's stone texture at normal state; each `HexTile` creates a translucent range-highlight overlay. `SetSelectedHighlight()` layers a brighter target selection over the current range without losing the other highlighted tiles.
 - `Assets/Scripts/HexGame/PlayerController.cs`: Owns the player's hex coordinate and exposes `IsMoving`. Confirmed movement skills animate with time-based `SmoothStep`; ordered skill execution waits for movement arrival before resolving a following action.
 - `Assets/Scripts/HexGame/EnemyController.cs`: Draws and publicly exposes a monster ability card each round. Each card owns initiative, move/attack values, range, execution order, and a target rule; nearest, lowest-HP, accumulated threat, and fixed role priority are resolved from the live board immediately before movement or attack, with equal scores falling back to nearest. A live attack with no valid target reports a short combat message through `TurnManager`.
@@ -38,5 +39,12 @@
 6. When movement executes, the player chooses a currently free in-range tile. When an attack executes, candidates are recalculated; one is automatic, several wait for selection, and zero produces `타겟 없음` feedback.
 7. Damage, healing, shield, stun, immobilize, movement/jump, push, and pull are resolved by `SkillLoadout`.
 8. A successful immediate or planned commit calls `SkillParticleEffects.Play()` once after gameplay effects resolve.
+
+## Terrain flow
+
+1. Create terrain assets with **Create > Hex Roguelike > Tile Data**, then assign a default and coordinate overrides on `HexGridManager.terrainPlacements` in the Inspector.
+2. `HexGridManager` uses weighted pathfinding for movement budgets, rejects movement-blocking tiles, traces axial LOS, and grants one range when the attacker is above the target.
+3. Player and enemy movement walks the selected path and invokes `HexTile.ApplyEnterEffect()` on every entered tile; one-shot traps retain consumed state on that runtime tile.
+4. Skills with `canDestroyTerrain` apply their Damage effects to destructible walls. At zero HP the wall uses `destroyedTile`, or behaves as a Normal non-blocking tile when no fallback is assigned.
 
 Push, pull, movement, jump, shield, stun, and immobilize are represented in skill data now; their board/status resolution is intentionally pending until their corresponding gameplay systems exist.

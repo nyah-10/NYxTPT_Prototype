@@ -33,13 +33,26 @@ public class PlayerController : MonoBehaviour
 
     public bool TryMoveTo(Vector2Int targetCoordinate)
     {
-        if (gridManager == null || !gridManager.TryGetTile(targetCoordinate, out HexTile tile))
+        if (gridManager == null || !gridManager.TryGetTile(targetCoordinate, out HexTile tile) || tile.BlocksMovement)
             return false;
 
-        currentCoordinate = targetCoordinate;
+        var path = gridManager.FindPath(currentCoordinate, targetCoordinate);
+        if (path.Count == 0 && targetCoordinate != currentCoordinate) return false;
         if (movement != null) StopCoroutine(movement);
-        movement = StartCoroutine(MoveToTile(tile.transform.position));
+        movement = StartCoroutine(MoveAlongPath(path));
         return true;
+    }
+
+    private IEnumerator MoveAlongPath(System.Collections.Generic.List<Vector2Int> path)
+    {
+        foreach (Vector2Int coordinate in path)
+        {
+            if (!gridManager.TryGetTile(coordinate, out HexTile tile)) break;
+            yield return MoveToTile(tile.transform.position);
+            currentCoordinate = coordinate;
+            tile.ApplyEnterEffect(GetComponent<UnitStats>());
+        }
+        movement = null;
     }
 
     private IEnumerator MoveToTile(Vector3 targetPosition)
@@ -55,6 +68,5 @@ public class PlayerController : MonoBehaviour
         }
 
         transform.position = targetPosition;
-        movement = null;
     }
 }

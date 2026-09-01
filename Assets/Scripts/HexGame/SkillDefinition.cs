@@ -56,6 +56,10 @@ public class SkillDefinition : ScriptableObject
     public bool targetsAllies;
     public bool targetsEnemies = true;
 
+    [Header("Terrain")]
+    [Tooltip("Allows this skill's Damage effects to target destructible terrain.")]
+    public bool canDestroyTerrain;
+
     [Header("Effects")]
     public SkillEffect[] effects;
 }

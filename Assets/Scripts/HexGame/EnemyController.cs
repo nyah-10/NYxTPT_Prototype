@@ -121,10 +121,17 @@ public class EnemyController : MonoBehaviour
         UnitStats focus = ResolveTarget(card.targetRule, int.MaxValue);
         if (focus == null || card.move <= 0 || stats.IsImmobilized) yield break;
         Vector2Int focusCoordinate = CoordinateOf(focus);
-        if (HexDistance(currentCoordinate, focusCoordinate) <= card.range) yield break;
+        if (gridManager.CanTarget(currentCoordinate, focusCoordinate, card.range)) yield break;
         Vector2Int target = FindBestDestination(focusCoordinate, card.move);
-        if (target != currentCoordinate && gridManager.TryGetTile(target, out HexTile tile))
-            yield return MoveToTile(target, tile.transform.position);
+        if (target != currentCoordinate)
+        {
+            foreach (Vector2Int step in gridManager.FindPath(currentCoordinate, target, card.move))
+            {
+                if (!gridManager.TryGetTile(step, out HexTile tile)) break;
+                yield return MoveToTile(step, tile.transform.position);
+                tile.ApplyEnterEffect(stats);
+            }
+        }
     }
 
     private void TryAttack(MonsterAbilityCard card)
@@ -146,7 +153,7 @@ public class EnemyController : MonoBehaviour
         {
             UnitStats stats = candidate.GetComponent<UnitStats>();
             int distance = HexDistance(currentCoordinate, candidate.CurrentCoordinate);
-            if (stats == null || stats.IsDead || distance > range) continue;
+            if (stats == null || stats.IsDead || !gridManager.CanTarget(currentCoordinate, candidate.CurrentCoordinate, range)) continue;
             if (best == null || IsBetterTarget(stats, best, rule, distance)) best = stats;
         }
         return best;
@@ -186,21 +193,16 @@ public class EnemyController : MonoBehaviour
         Vector2Int bestCoordinate = currentCoordinate;
         int bestDistance = HexDistance(currentCoordinate, playerCoordinate);
 
-        // Evaluate every reachable hex so the movement skill can travel up to two tiles.
-        for (int step = 1; step <= allowedMove; step++)
+        // Terrain costs, rather than geometric distance, consume the movement budget.
+        foreach (Vector2Int candidate in gridManager.GetReachableCoordinates(currentCoordinate, allowedMove))
         {
-            foreach (Vector2Int direction in NeighborDirections)
-            {
-                Vector2Int candidate = currentCoordinate + direction * step;
-                if (candidate == playerCoordinate || !gridManager.TryGetTile(candidate, out _))
-                    continue;
+            if (candidate == currentCoordinate || candidate == playerCoordinate) continue;
 
-                int distance = HexDistance(candidate, playerCoordinate);
-                if (distance < bestDistance)
-                {
-                    bestDistance = distance;
-                    bestCoordinate = candidate;
-                }
+            int distance = HexDistance(candidate, playerCoordinate);
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestCoordinate = candidate;
             }
         }
 
@@ -252,11 +254,12 @@ public class EnemyController : MonoBehaviour
 
     public bool ForceMoveTo(Vector2Int targetCoordinate)
     {
-        if (gridManager == null || !gridManager.TryGetTile(targetCoordinate, out HexTile tile))
+        if (gridManager == null || !gridManager.TryGetTile(targetCoordinate, out HexTile tile) || tile.BlocksMovement)
             return false;
 
         currentCoordinate = targetCoordinate;
         transform.position = tile.transform.position;
+        tile.ApplyEnterEffect(GetComponent<UnitStats>());
         return true;
     }
 }
