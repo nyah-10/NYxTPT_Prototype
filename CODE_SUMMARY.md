@@ -10,9 +10,9 @@
 
 - `Assets/Scripts/HexGame/TileData.cs`: Defines extensible terrain ScriptableObjects (type, movement cost, LOS/movement blocking, elevation, enter effects, trigger persistence, and destructible-wall HP/fallback terrain).
 - `Assets/Scripts/HexGame/RoomTemplate.cs`: Defines hand-authored room assets with a grid size, serialized coordinate-to-`TileData` layout, edge entry points, and filter tags.
-- `Assets/Scripts/HexGame/RunMapGenerator.cs`: Selects 3-6 weighted room templates with a recent-use cooldown, builds linear or branching entry-point connections, stores a selected room across scene loading, and draws the generated graph with Gizmos.
+- `Assets/Scripts/HexGame/RunMapGenerator.cs`: Selects 3-6 weighted room templates, physically places their painted cells without overlap by matching opposite entry points, normalizes the combined dungeon coordinates, chooses valid first/last-room unit spawns, and transfers the complete layout into Combat.
 - `Assets/Scripts/HexGame/MainMenuController.cs`: Builds an FHD-scaled bilingual start menu, creates a fresh run on Start click, validates the Combat scene, and selects the first generated room before scene loading.
-- `Assets/Scripts/HexGame/HexGridManager.cs`: Generates only a selected room template's axial grid, colors special terrain while preserving the tile texture, and stores runtime tiles. Each `HexTile` creates a translucent range-highlight overlay; `SetSelectedHighlight()` layers a brighter target selection over the current range.
+- `Assets/Scripts/HexGame/HexGridManager.cs`: Generates only explicitly painted cells from a selected room or physically combined dungeon, leaves erased cells empty, frames the camera around the result, colors special terrain, and exposes generated player/enemy spawn coordinates.
 - `Assets/Scripts/HexGame/PlayerController.cs`: Owns the player's hex coordinate and exposes `IsMoving`. Confirmed movement skills animate with time-based `SmoothStep`; ordered skill execution waits for movement arrival before resolving a following action.
 - `Assets/Scripts/HexGame/EnemyController.cs`: Draws and publicly exposes a monster ability card each round. Each card owns initiative, move/attack values, range, execution order, and a target rule; nearest, lowest-HP, accumulated threat, and fixed role priority are resolved from the live board immediately before movement or attack, with equal scores falling back to nearest. A live attack with no valid target reports a short combat message through `TurnManager`.
 - `Assets/Scripts/HexGame/TurnManager.cs`: Registers every player and monster, owns combat reset, three round phases, multi-player card submission, the authoritative initiative queue, per-entry pending/acting/completed/skipped state, and short combat-feedback events. Chosen card initiatives sort ascending; the isolated `CompareQueueEntries()` tie-break resolves players first, then registration order. Each queued unit is revalidated immediately before its action, then waits `turnTransitionDelay` before the next entry begins.
@@ -55,8 +55,8 @@
 ## Room map flow
 
 1. Build index 0 opens the `Main` scene. `MainMenuController` creates the 1920x1080-scaled start screen at runtime.
-2. Start click asks `RunMapGenerator` to choose 3-6 rooms using difficulty-scaled `hazard` weighting and a recent-use cooldown, then selects node 0 and loads `Combat`.
-3. `HexGridManager.Awake()` consumes the pending template, resizes the grid, copies its terrain layout, and generates runtime tiles. Without a selected room it clears the obsolete baked 8x6 board instead of generating a default map.
+2. Start click asks `RunMapGenerator` to choose 3-6 rooms, matches opposite entry points, rejects overlapping placements, and produces one physical dungeon layout containing all selected rooms.
+3. `HexGridManager.Awake()` consumes the combined layout and generates only explicitly painted cells; erased template cells remain actual void. The camera frames the complete dungeon and units use valid cells in its first and last rooms.
 4. Later map UI can call `SelectNode(nodeId)` for subsequent nodes; Turn and combat managers remain independent.
 
 Push, pull, movement, jump, shield, stun, and immobilize are represented in skill data now; their board/status resolution is intentionally pending until their corresponding gameplay systems exist.

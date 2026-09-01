@@ -11,6 +11,7 @@ public class RunMapNode
     public int id;
     public RoomTemplate room;
     public Vector2 debugPosition;
+    public Vector2Int mapOffset;
 }
 
 [Serializable]
@@ -20,6 +21,14 @@ public class RunMapConnection
     public int toNode;
     public Vector2Int fromEntry;
     public Vector2Int toEntry;
+}
+
+public class GeneratedDungeonLayout
+{
+    public Vector2Int gridSize;
+    public List<RoomTile> tiles = new();
+    public Vector2Int playerSpawn;
+    public Vector2Int enemySpawn;
 }
 
 public class RunMapGenerator : MonoBehaviour
@@ -46,6 +55,7 @@ public class RunMapGenerator : MonoBehaviour
     public List<RunMapConnection> connections = new();
 
     public static RoomTemplate PendingRoom { get; private set; }
+    public static GeneratedDungeonLayout PendingDungeon { get; private set; }
 
     private readonly Queue<RoomTemplate> recentRooms = new();
 
@@ -64,10 +74,11 @@ public class RunMapGenerator : MonoBehaviour
         {
             RoomTemplate room = ChooseRoom();
             if (room == null) break;
-            nodes.Add(new RunMapNode { id = i, room = room, debugPosition = GetDebugPosition(i) });
+            nodes.Add(new RunMapNode { id = i, room = room });
             Remember(room);
-            if (i > 0) ConnectNode(i);
         }
+
+        ComposeDungeon();
 
         if (logGeneratedMap)
             Debug.Log($"Generated {nodes.Count}-room {mapShape} map: " + string.Join(" -> ", nodes.ConvertAll(n => n.room.display_name)));
@@ -80,6 +91,23 @@ public class RunMapGenerator : MonoBehaviour
         PendingRoom = node.room;
         if (!string.IsNullOrWhiteSpace(combatSceneName)) SceneManager.LoadScene(combatSceneName);
         else FindAnyObjectByType<HexGridManager>()?.ApplyRoomTemplate(PendingRoom);
+    }
+
+    public void LoadGeneratedDungeon()
+    {
+        if (nodes.Count == 0) GenerateMap();
+        PendingDungeon = BuildLayout();
+        if (PendingDungeon == null || PendingDungeon.tiles.Count == 0) return;
+        PendingRoom = null;
+        if (!string.IsNullOrWhiteSpace(combatSceneName)) SceneManager.LoadScene(combatSceneName);
+        else FindAnyObjectByType<HexGridManager>()?.ApplyDungeonLayout(PendingDungeon);
+    }
+
+    public static GeneratedDungeonLayout ConsumePendingDungeon()
+    {
+        GeneratedDungeonLayout layout = PendingDungeon;
+        PendingDungeon = null;
+        return layout;
     }
 
     public static RoomTemplate ConsumePendingRoom()
@@ -114,34 +142,149 @@ public class RunMapGenerator : MonoBehaviour
         while (recentRooms.Count > recentTemplateCooldown) recentRooms.Dequeue();
     }
 
-    private void ConnectNode(int childIndex)
+    private void ComposeDungeon()
     {
-        int parentIndex = mapShape == RunMapShape.Linear ? childIndex - 1 : UnityEngine.Random.Range(0, childIndex);
-        RoomTemplate from = nodes[parentIndex].room;
-        RoomTemplate to = nodes[childIndex].room;
-        FindEntryPair(from, to, out Vector2Int fromEntry, out Vector2Int toEntry);
-        connections.Add(new RunMapConnection { fromNode = parentIndex, toNode = childIndex, fromEntry = fromEntry, toEntry = toEntry });
+        connections.Clear();
+        if (nodes.Count == 0) return;
+        HashSet<Vector2Int> occupied = new();
+        nodes[0].mapOffset = Vector2Int.zero;
+        AddOccupied(nodes[0], occupied);
+
+        for (int childIndex = 1; childIndex < nodes.Count; childIndex++)
+        {
+            bool placed = false;
+            List<int> parents = ParentCandidates(childIndex);
+            foreach (int parentIndex in parents)
+            {
+                if (!TryPlace(nodes[parentIndex], nodes[childIndex], occupied,
+                    out Vector2Int offset, out Vector2Int fromEntry, out Vector2Int toEntry)) continue;
+                nodes[childIndex].mapOffset = offset;
+                connections.Add(new RunMapConnection { fromNode = parentIndex, toNode = childIndex, fromEntry = fromEntry, toEntry = toEntry });
+                placed = true;
+                break;
+            }
+
+            if (!placed)
+            {
+                RunMapNode parent = nodes[childIndex - 1];
+                int rightEdge = MaxOccupiedX(occupied) + 1;
+                nodes[childIndex].mapOffset = new Vector2Int(rightEdge, parent.mapOffset.y);
+                connections.Add(new RunMapConnection { fromNode = parent.id, toNode = childIndex });
+                Debug.LogWarning($"No collision-free entry pair for {nodes[childIndex].room.name}; placed it at the dungeon frontier.");
+            }
+            AddOccupied(nodes[childIndex], occupied);
+        }
+
+        NormalizeOffsets();
     }
 
-    private static void FindEntryPair(RoomTemplate from, RoomTemplate to, out Vector2Int fromEntry, out Vector2Int toEntry)
+    private List<int> ParentCandidates(int childIndex)
     {
-        fromEntry = from.entry_points.Count > 0 ? from.entry_points[UnityEngine.Random.Range(0, from.entry_points.Count)] : Vector2Int.zero;
-        toEntry = to.entry_points.Count > 0 ? to.entry_points[UnityEngine.Random.Range(0, to.entry_points.Count)] : Vector2Int.zero;
-        // Opposing edges make the selected doorway pair useful to a later physical room compositor.
-        foreach (Vector2Int candidate in to.entry_points)
-            if (IsOppositeEdge(from, fromEntry, to, candidate)) { toEntry = candidate; return; }
+        List<int> result = new();
+        if (mapShape == RunMapShape.Linear) { result.Add(childIndex - 1); return result; }
+        for (int i = 0; i < childIndex; i++) result.Add(i);
+        for (int i = result.Count - 1; i > 0; i--)
+        {
+            int swap = UnityEngine.Random.Range(0, i + 1);
+            (result[i], result[swap]) = (result[swap], result[i]);
+        }
+        return result;
+    }
+
+    private static bool TryPlace(RunMapNode parent, RunMapNode child, HashSet<Vector2Int> occupied,
+        out Vector2Int offset, out Vector2Int fromEntry, out Vector2Int toEntry)
+    {
+        foreach (Vector2Int from in parent.room.entry_points)
+        foreach (Vector2Int to in child.room.entry_points)
+        {
+            if (!IsOppositeEdge(parent.room, from, child.room, to)) continue;
+            Vector2Int candidate = parent.mapOffset + from + Outward(parent.room, from) - to;
+            if (Overlaps(child.room, candidate, occupied)) continue;
+            offset = candidate; fromEntry = from; toEntry = to; return true;
+        }
+        offset = default; fromEntry = default; toEntry = default; return false;
     }
 
     private static bool IsOppositeEdge(RoomTemplate a, Vector2Int p, RoomTemplate b, Vector2Int q) =>
         p.x == 0 && q.x == b.GridSize.x - 1 || p.x == a.GridSize.x - 1 && q.x == 0 ||
         p.y == 0 && q.y == b.GridSize.y - 1 || p.y == a.GridSize.y - 1 && q.y == 0;
 
-    private Vector2 GetDebugPosition(int index)
+    private static Vector2Int Outward(RoomTemplate room, Vector2Int entry)
     {
-        if (mapShape == RunMapShape.Linear) return new Vector2(index * 3f, 0f);
-        int depth = Mathf.FloorToInt(Mathf.Log(index + 1, 2));
-        int first = (1 << depth) - 1;
-        return new Vector2(depth * 3f, (index - first - (1 << depth) * .5f) * 2f);
+        if (entry.x == 0) return Vector2Int.left;
+        if (entry.x == room.GridSize.x - 1) return Vector2Int.right;
+        if (entry.y == 0) return Vector2Int.down;
+        return Vector2Int.up;
+    }
+
+    private static bool Overlaps(RoomTemplate room, Vector2Int offset, HashSet<Vector2Int> occupied)
+    {
+        foreach (RoomTile tile in room.TileLayout)
+            if (tile.tileData != null && occupied.Contains(tile.coordinate + offset)) return true;
+        return false;
+    }
+
+    private static void AddOccupied(RunMapNode node, HashSet<Vector2Int> occupied)
+    {
+        foreach (RoomTile tile in node.room.TileLayout)
+            if (tile.tileData != null) occupied.Add(tile.coordinate + node.mapOffset);
+    }
+
+    private static int MaxOccupiedX(HashSet<Vector2Int> occupied)
+    {
+        int maximum = 0;
+        foreach (Vector2Int coordinate in occupied) maximum = Mathf.Max(maximum, coordinate.x);
+        return maximum;
+    }
+
+    private void NormalizeOffsets()
+    {
+        int minX = int.MaxValue, minY = int.MaxValue;
+        foreach (RunMapNode node in nodes)
+        foreach (RoomTile tile in node.room.TileLayout)
+        {
+            Vector2Int coordinate = tile.coordinate + node.mapOffset;
+            minX = Mathf.Min(minX, coordinate.x); minY = Mathf.Min(minY, coordinate.y);
+        }
+        Vector2Int shift = minX == int.MaxValue ? Vector2Int.zero : new Vector2Int(-minX, -minY);
+        foreach (RunMapNode node in nodes)
+        {
+            node.mapOffset += shift;
+            node.debugPosition = node.mapOffset + node.room.GridSize / 2;
+        }
+    }
+
+    private GeneratedDungeonLayout BuildLayout()
+    {
+        Dictionary<Vector2Int, TileData> combined = new();
+        int maxX = -1, maxY = -1;
+        foreach (RunMapNode node in nodes)
+        foreach (RoomTile tile in node.room.TileLayout)
+        {
+            if (tile.tileData == null) continue;
+            Vector2Int coordinate = tile.coordinate + node.mapOffset;
+            combined[coordinate] = tile.tileData;
+            maxX = Mathf.Max(maxX, coordinate.x); maxY = Mathf.Max(maxY, coordinate.y);
+        }
+        if (combined.Count == 0) return null;
+        GeneratedDungeonLayout layout = new() { gridSize = new Vector2Int(maxX + 1, maxY + 1) };
+        foreach (KeyValuePair<Vector2Int, TileData> tile in combined)
+            layout.tiles.Add(new RoomTile { coordinate = tile.Key, tileData = tile.Value });
+        layout.playerSpawn = FindSpawn(nodes[0], combined, false);
+        layout.enemySpawn = FindSpawn(nodes[^1], combined, true);
+        return layout;
+    }
+
+    private static Vector2Int FindSpawn(RunMapNode node, Dictionary<Vector2Int, TileData> combined, bool reverse)
+    {
+        IReadOnlyList<RoomTile> tiles = node.room.TileLayout;
+        for (int step = 0; step < tiles.Count; step++)
+        {
+            int index = reverse ? tiles.Count - 1 - step : step;
+            Vector2Int coordinate = tiles[index].coordinate + node.mapOffset;
+            if (combined.TryGetValue(coordinate, out TileData data) && data != null && !data.blocksMovement) return coordinate;
+        }
+        return node.mapOffset;
     }
 
     private void OnDrawGizmos()

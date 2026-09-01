@@ -75,6 +75,9 @@ public class EnemyController : MonoBehaviour
         if (gridManager == null)
             gridManager = FindAnyObjectByType<HexGridManager>();
 
+        if (gridManager != null)
+            startCoordinate = gridManager.EnemySpawnCoordinate;
+
         if (gridManager != null && gridManager.TryGetTile(startCoordinate, out HexTile startTile))
         {
             currentCoordinate = startCoordinate;

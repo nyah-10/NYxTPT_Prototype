@@ -21,6 +21,9 @@ public class PlayerController : MonoBehaviour
         if (turnManager == null)
             turnManager = FindAnyObjectByType<TurnManager>();
 
+        if (gridManager != null)
+            startCoordinate = gridManager.PlayerSpawnCoordinate;
+
         if (gridManager == null || !gridManager.TryGetTile(startCoordinate, out HexTile tile))
         {
             enabled = false;

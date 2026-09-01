@@ -25,12 +25,18 @@ public class HexGridManager : MonoBehaviour
 
     private readonly Dictionary<Vector2Int, HexTile> tiles = new();
     private readonly Dictionary<Vector2Int, Color> highlightColors = new();
+    private readonly HashSet<Vector2Int> generatedCoordinates = new();
     private Vector2Int? selectedHighlight;
+    private bool useGeneratedCoordinateMask;
+    public Vector2Int PlayerSpawnCoordinate { get; private set; }
+    public Vector2Int EnemySpawnCoordinate { get; private set; }
 
     private void Awake()
     {
+        GeneratedDungeonLayout dungeon = RunMapGenerator.ConsumePendingDungeon();
         RoomTemplate selectedRoom = RunMapGenerator.ConsumePendingRoom();
-        if (selectedRoom != null) ApplyRoomTemplate(selectedRoom);
+        if (dungeon != null) ApplyDungeonLayout(dungeon);
+        else if (selectedRoom != null) ApplyRoomTemplate(selectedRoom);
         else
         {
             // Combat grids only exist for a selected run node; remove the obsolete baked 8x6 board.
@@ -45,8 +51,36 @@ public class HexGridManager : MonoBehaviour
         width = room.GridSize.x;
         height = room.GridSize.y;
         terrainPlacements.Clear();
+        generatedCoordinates.Clear();
+        bool foundSpawn = false;
         foreach (RoomTile tile in room.TileLayout)
+        {
             terrainPlacements.Add(new TerrainTilePlacement { coordinate = tile.coordinate, tileData = tile.tileData });
+            if (tile.tileData != null) generatedCoordinates.Add(tile.coordinate);
+            if (tile.tileData == null || tile.tileData.blocksMovement) continue;
+            if (!foundSpawn) { PlayerSpawnCoordinate = tile.coordinate; foundSpawn = true; }
+            EnemySpawnCoordinate = tile.coordinate;
+        }
+        useGeneratedCoordinateMask = true;
+        if (tileParent != null) tileParent.gameObject.SetActive(true);
+        GenerateGrid();
+    }
+
+    public void ApplyDungeonLayout(GeneratedDungeonLayout layout)
+    {
+        if (layout == null) return;
+        width = Mathf.Max(1, layout.gridSize.x);
+        height = Mathf.Max(1, layout.gridSize.y);
+        terrainPlacements.Clear();
+        generatedCoordinates.Clear();
+        foreach (RoomTile tile in layout.tiles)
+        {
+            terrainPlacements.Add(new TerrainTilePlacement { coordinate = tile.coordinate, tileData = tile.tileData });
+            generatedCoordinates.Add(tile.coordinate);
+        }
+        PlayerSpawnCoordinate = layout.playerSpawn;
+        EnemySpawnCoordinate = layout.enemySpawn;
+        useGeneratedCoordinateMask = true;
         if (tileParent != null) tileParent.gameObject.SetActive(true);
         GenerateGrid();
     }
@@ -68,6 +102,7 @@ public class HexGridManager : MonoBehaviour
             for (int r = 0; r < height; r++)
             {
                 Vector2Int coordinate = new Vector2Int(q, r);
+                if (useGeneratedCoordinateMask && !generatedCoordinates.Contains(coordinate)) continue;
 
                 GameObject tileObject = Instantiate(
                     hexTilePrefab,
@@ -223,6 +258,26 @@ public class HexGridManager : MonoBehaviour
             highlightColors[coordinate] = color;
             tile.SetHighlight(color);
         }
+        FrameCamera();
+    }
+
+    private void FrameCamera()
+    {
+        Camera targetCamera = Camera.main;
+        if (targetCamera == null || tiles.Count == 0) return;
+        bool initialized = false;
+        Vector3 minimum = default, maximum = default;
+        foreach (HexTile tile in tiles.Values)
+        {
+            Vector3 position = tile.transform.position;
+            if (!initialized) { minimum = maximum = position; initialized = true; }
+            else { minimum = Vector3.Min(minimum, position); maximum = Vector3.Max(maximum, position); }
+        }
+        Vector3 center = (minimum + maximum) * .5f;
+        targetCamera.transform.position = new Vector3(center.x, center.y, targetCamera.transform.position.z);
+        float aspect = Mathf.Max(.1f, targetCamera.aspect);
+        targetCamera.orthographicSize = Mathf.Max((maximum.y - minimum.y) * .5f + 1f,
+            (maximum.x - minimum.x) * .5f / aspect + 1f);
     }
 
     public void SetSelectedHighlight(Vector2Int coordinate)

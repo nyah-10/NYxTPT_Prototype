@@ -39,7 +39,7 @@ public class MainMenuController : MonoBehaviour
             return;
         }
 
-        mapGenerator.SelectNode(0);
+        mapGenerator.LoadGeneratedDungeon();
     }
 
     private void BuildMenu()
