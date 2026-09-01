@@ -47,6 +47,7 @@ public class HexGridManager : MonoBehaviour
         terrainPlacements.Clear();
         foreach (RoomTile tile in room.TileLayout)
             terrainPlacements.Add(new TerrainTilePlacement { coordinate = tile.coordinate, tileData = tile.tileData });
+        if (tileParent != null) tileParent.gameObject.SetActive(true);
         GenerateGrid();
     }
 
@@ -82,8 +83,9 @@ public class HexGridManager : MonoBehaviour
                 if (tile == null)
                     tile = tileObject.AddComponent<HexTile>();
 
-                tile.Initialize(coordinate, GetConfiguredTileData(coordinate));
-                SetTileColor(tileObject);
+                TileData configuredData = GetConfiguredTileData(coordinate);
+                tile.Initialize(coordinate, configuredData);
+                SetTileColor(tileObject, configuredData);
                 tiles[coordinate] = tile;
             }
         }
@@ -259,14 +261,22 @@ public class HexGridManager : MonoBehaviour
         return (Mathf.Abs(dq) + Mathf.Abs(dr) + Mathf.Abs(dq + dr)) / 2;
     }
 
-    private static void SetTileColor(GameObject tileObject)
+    private static void SetTileColor(GameObject tileObject, TileData data)
     {
         SpriteRenderer renderer = tileObject.GetComponent<SpriteRenderer>();
 
         if (renderer == null)
             return;
 
-        renderer.color = Color.white;
+        renderer.color = data == null ? Color.white : data.tileType switch
+        {
+            TileType.Elevated => new Color(.62f, .78f, 1f),
+            TileType.Obstacle => new Color(.33f, .36f, .42f),
+            TileType.Trap => new Color(1f, .48f, .42f),
+            TileType.Swamp => new Color(.48f, .72f, .5f),
+            TileType.DestructibleWall => new Color(.58f, .44f, .34f),
+            _ => Color.white
+        };
     }
 
     private void ClearGrid()
@@ -278,7 +288,11 @@ public class HexGridManager : MonoBehaviour
         for (int i = parent.childCount - 1; i >= 0; i--)
         {
             if (Application.isPlaying)
-                Destroy(parent.GetChild(i).gameObject);
+            {
+                Transform obsoleteTile = parent.GetChild(i);
+                obsoleteTile.SetParent(null);
+                Destroy(obsoleteTile.gameObject);
+            }
             else
                 DestroyImmediate(parent.GetChild(i).gameObject);
         }
