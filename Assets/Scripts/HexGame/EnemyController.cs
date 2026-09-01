@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum MonsterTargetRule { Nearest, LowestHp, HighestThreat, FixedPriority }
@@ -121,20 +122,58 @@ public class EnemyController : MonoBehaviour
 
     private IEnumerator TryMove(MonsterAbilityCard card, UnitStats stats)
     {
-        UnitStats focus = ResolveTarget(card.targetRule, int.MaxValue);
+        UnitStats focus = ResolveMovementTarget(card.targetRule);
         if (focus == null || card.move <= 0 || stats.IsImmobilized) yield break;
         Vector2Int focusCoordinate = CoordinateOf(focus);
         if (gridManager.CanTarget(currentCoordinate, focusCoordinate, card.range)) yield break;
-        Vector2Int target = FindBestDestination(focusCoordinate, card.move);
-        if (target != currentCoordinate)
+
+        List<Vector2Int> path = gridManager.FindPath(currentCoordinate, focusCoordinate);
+        int spentMovement = 0;
+        foreach (Vector2Int step in path)
         {
-            foreach (Vector2Int step in gridManager.FindPath(currentCoordinate, target, card.move))
+            if (!gridManager.TryGetTile(step, out HexTile tile) || IsOccupiedByOtherUnit(step)) break;
+            int nextCost = spentMovement + tile.MoveCost;
+            if (nextCost > card.move) break;
+            spentMovement = nextCost;
+            yield return MoveToTile(step, tile.transform.position);
+            tile.ApplyEnterEffect(stats);
+        }
+    }
+
+    private UnitStats ResolveMovementTarget(MonsterTargetRule rule)
+    {
+        UnitStats best = null;
+        int bestPathLength = int.MaxValue;
+        foreach (PlayerController candidate in FindObjectsByType<PlayerController>())
+        {
+            UnitStats stats = candidate.GetComponent<UnitStats>();
+            if (stats == null || stats.IsDead || !gridManager.TryGetTile(candidate.CurrentCoordinate, out _)) continue;
+            List<Vector2Int> path = gridManager.FindPath(currentCoordinate, candidate.CurrentCoordinate);
+            if (path.Count == 0 && currentCoordinate != candidate.CurrentCoordinate) continue;
+            if (best == null || IsBetterMovementTarget(stats, best, rule, path.Count, bestPathLength))
             {
-                if (!gridManager.TryGetTile(step, out HexTile tile)) break;
-                yield return MoveToTile(step, tile.transform.position);
-                tile.ApplyEnterEffect(stats);
+                best = stats;
+                bestPathLength = path.Count;
             }
         }
+        return best;
+    }
+
+    private bool IsBetterMovementTarget(UnitStats candidate, UnitStats current, MonsterTargetRule rule,
+        int candidatePathLength, int currentPathLength)
+    {
+        if (rule == MonsterTargetRule.LowestHp && candidate.CurrentHP != current.CurrentHP)
+            return candidate.CurrentHP < current.CurrentHP;
+        if (rule == MonsterTargetRule.HighestThreat)
+        {
+            UnitStats self = GetComponent<UnitStats>();
+            int candidateThreat = self.GetThreatFrom(candidate);
+            int currentThreat = self.GetThreatFrom(current);
+            if (candidateThreat != currentThreat) return candidateThreat > currentThreat;
+        }
+        if (rule == MonsterTargetRule.FixedPriority && RolePriority(candidate.Role) != RolePriority(current.Role))
+            return RolePriority(candidate.Role) > RolePriority(current.Role);
+        return candidatePathLength < currentPathLength;
     }
 
     private void TryAttack(MonsterAbilityCard card)
@@ -191,25 +230,17 @@ public class EnemyController : MonoBehaviour
 
     private static Vector2Int CoordinateOf(UnitStats stats) => stats.GetComponent<PlayerController>().CurrentCoordinate;
 
-    private Vector2Int FindBestDestination(Vector2Int playerCoordinate, int allowedMove)
+    private bool IsOccupiedByOtherUnit(Vector2Int coordinate)
     {
-        Vector2Int bestCoordinate = currentCoordinate;
-        int bestDistance = HexDistance(currentCoordinate, playerCoordinate);
-
-        // Terrain costs, rather than geometric distance, consume the movement budget.
-        foreach (Vector2Int candidate in gridManager.GetReachableCoordinates(currentCoordinate, allowedMove))
+        foreach (UnitStats unit in FindObjectsByType<UnitStats>())
         {
-            if (candidate == currentCoordinate || candidate == playerCoordinate) continue;
-
-            int distance = HexDistance(candidate, playerCoordinate);
-            if (distance < bestDistance)
-            {
-                bestDistance = distance;
-                bestCoordinate = candidate;
-            }
+            if (unit == null || unit.gameObject == gameObject || unit.IsDead) continue;
+            PlayerController player = unit.GetComponent<PlayerController>();
+            EnemyController enemy = unit.GetComponent<EnemyController>();
+            if (player != null && player.CurrentCoordinate == coordinate ||
+                enemy != null && enemy.CurrentCoordinate == coordinate) return true;
         }
-
-        return bestCoordinate;
+        return false;
     }
 
     private void AttackPlayer(PlayerController player)
