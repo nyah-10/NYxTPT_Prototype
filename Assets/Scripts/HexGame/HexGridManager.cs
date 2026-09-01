@@ -31,7 +31,12 @@ public class HexGridManager : MonoBehaviour
     {
         RoomTemplate selectedRoom = RunMapGenerator.ConsumePendingRoom();
         if (selectedRoom != null) ApplyRoomTemplate(selectedRoom);
-        else GenerateGrid();
+        else
+        {
+            // Combat grids only exist for a selected run node; remove the obsolete baked 8x6 board.
+            ClearGrid();
+            Debug.LogError("No RoomTemplate was selected. Start the game from the Main scene.");
+        }
     }
 
     public void ApplyRoomTemplate(RoomTemplate room)
