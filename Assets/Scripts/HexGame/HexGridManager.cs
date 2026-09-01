@@ -124,6 +124,7 @@ public class HexGridManager : MonoBehaviour
                 tiles[coordinate] = tile;
             }
         }
+        FrameCamera();
     }
 
     // Pointy-top axial 좌표를 월드 좌표로 바꿉니다.
@@ -258,7 +259,6 @@ public class HexGridManager : MonoBehaviour
             highlightColors[coordinate] = color;
             tile.SetHighlight(color);
         }
-        FrameCamera();
     }
 
     private void FrameCamera()
@@ -323,7 +323,7 @@ public class HexGridManager : MonoBehaviour
         if (renderer == null)
             return;
 
-        renderer.color = data == null ? Color.white : data.tileType switch
+        Color color = data == null ? Color.white : data.tileType switch
         {
             TileType.Elevated => new Color(.62f, .78f, 1f),
             TileType.Obstacle => new Color(.33f, .36f, .42f),
@@ -332,6 +332,9 @@ public class HexGridManager : MonoBehaviour
             TileType.DestructibleWall => new Color(.58f, .44f, .34f),
             _ => Color.white
         };
+        HexTile tile = tileObject.GetComponent<HexTile>();
+        if (tile != null) tile.SetBaseColor(color);
+        else renderer.color = color;
     }
 
     private void ClearGrid()
@@ -363,6 +366,7 @@ public class HexTile : MonoBehaviour
     private bool destroyed;
     private SpriteRenderer tileRenderer;
     private SpriteRenderer highlightRenderer;
+    private Color baseColor = Color.white;
 
     public TileData Data => tileData;
     public TileType TileType => destroyed ? TileType.Normal : tileData == null ? TileType.Normal : tileData.tileType;
@@ -415,7 +419,7 @@ public class HexTile : MonoBehaviour
 
         // A translucent overlay keeps the stone texture visible while making range tiles distinct.
         color.a = Mathf.Clamp(color.a, 0.4f, 0.85f);
-        tileRenderer.color = Color.Lerp(Color.white, color, color.a > .7f ? .58f : .35f);
+        tileRenderer.color = Color.Lerp(baseColor, color, color.a > .7f ? .58f : .35f);
         highlightRenderer.color = color;
         highlightRenderer.enabled = true;
     }
@@ -426,7 +430,14 @@ public class HexTile : MonoBehaviour
             highlightRenderer.enabled = false;
 
         if (tileRenderer != null)
-            tileRenderer.color = Color.white;
+            tileRenderer.color = baseColor;
+    }
+
+    public void SetBaseColor(Color color)
+    {
+        if (tileRenderer == null) tileRenderer = GetComponent<SpriteRenderer>();
+        baseColor = color;
+        if (tileRenderer != null) tileRenderer.color = baseColor;
     }
 
     private void CreateHighlightOverlay()

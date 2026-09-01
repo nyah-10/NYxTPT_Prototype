@@ -181,10 +181,33 @@ public class SkillActionUI : MonoBehaviour
         selectedSkill = skill; Vector2Int source = playerSkills.GetPlanningSource();
         bool chooseAtExecution = true;
         selectedTarget = skill.targetsSelf || chooseAtExecution ? source : InvalidTarget;
-        gridManager.ClearHighlights();
+        ShowRangePreview(skill, source);
         status.text = skill.displayName;
-        detail.text = chooseAtExecution ? "대상은 이 유닛의 실행 차례에 선택합니다." : skill.targetsSelf ? "자신이 대상으로 선택되었습니다. 사용 버튼을 누르세요." : "강조된 타일에서 대상을 선택하세요.";
+        detail.text = chooseAtExecution ? "강조된 범위는 예상 사거리입니다. 실제 대상은 실행 차례에 선택합니다." : skill.targetsSelf ? "자신이 대상으로 선택되었습니다. 사용 버튼을 누르세요." : "강조된 타일에서 대상을 선택하세요.";
         RefreshStates();
+    }
+
+    private void ShowRangePreview(SkillDefinition skill, Vector2Int source)
+    {
+        List<Vector2Int> preview;
+        if (skill.targetsSelf)
+        {
+            preview = new List<Vector2Int> { source };
+        }
+        else if (HasMovement(skill))
+        {
+            preview = gridManager.GetReachableCoordinates(source, skill.range);
+            preview.Remove(source);
+        }
+        else
+        {
+            preview = gridManager.GetCoordinatesInRange(source, skill.range);
+            preview.RemoveAll(coordinate => coordinate == source || !gridManager.CanTarget(source, coordinate, skill.range));
+        }
+
+        Color color = skill.targetsSelf ? new Color(.3f, .9f, .48f, .62f) :
+            skill.actionSlot == SkillActionSlot.Main ? new Color(1f, .4f, .12f, .58f) : new Color(.08f, .76f, 1f, .58f);
+        gridManager.SetHighlights(preview, color);
     }
 
     private void Confirm()
