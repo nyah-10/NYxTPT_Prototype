@@ -9,6 +9,8 @@
 ## Runtime scripts
 
 - `Assets/Scripts/HexGame/TileData.cs`: Defines extensible terrain ScriptableObjects (type, movement cost, LOS/movement blocking, elevation, enter effects, trigger persistence, and destructible-wall HP/fallback terrain).
+- `Assets/Scripts/HexGame/RoomTemplate.cs`: Defines hand-authored room assets with a grid size, serialized coordinate-to-`TileData` layout, edge entry points, and filter tags.
+- `Assets/Scripts/HexGame/RunMapGenerator.cs`: Selects 3-6 weighted room templates with a recent-use cooldown, builds linear or branching entry-point connections, stores a selected room across scene loading, and draws the generated graph with Gizmos.
 - `Assets/Scripts/HexGame/HexGridManager.cs`: Generates and stores the axial-coordinate hex grid. It preserves the `HexTile` prefab's stone texture at normal state; each `HexTile` creates a translucent range-highlight overlay. `SetSelectedHighlight()` layers a brighter target selection over the current range without losing the other highlighted tiles.
 - `Assets/Scripts/HexGame/PlayerController.cs`: Owns the player's hex coordinate and exposes `IsMoving`. Confirmed movement skills animate with time-based `SmoothStep`; ordered skill execution waits for movement arrival before resolving a following action.
 - `Assets/Scripts/HexGame/EnemyController.cs`: Draws and publicly exposes a monster ability card each round. Each card owns initiative, move/attack values, range, execution order, and a target rule; nearest, lowest-HP, accumulated threat, and fixed role priority are resolved from the live board immediately before movement or attack, with equal scores falling back to nearest. A live attack with no valid target reports a short combat message through `TurnManager`.
@@ -28,6 +30,7 @@
 - `Assets/Resources/SkillEffects/*.png`: Four generated transparent particle sprites used by `SkillParticleEffects` for Sword Strike, Arcane Bolt, First Aid, and Leap.
 - `Assets/Scripts/HexGame/UnitHealthBar.cs`: Displays a larger world-space HP bar and `CurrentHP / MaxHP` text above each unit. The fill changes from green to yellow to red as health falls.
 - `Assets/Editor/SkillExampleAssets.cs`: Editor utility that creates four editable example skill assets in `Assets/Skills/Examples`: Sword Strike, Arcane Bolt, First Aid, and Leap.
+- `Assets/Editor/RoomTemplateEditorWindow.cs`: Provides a room grid painter with tile brushes and edge-entry editing, plus a menu command that creates a terrain palette and six editable sample room assets.
 
 ## Skill flow
 
@@ -46,5 +49,12 @@
 2. `HexGridManager` uses weighted pathfinding for movement budgets, rejects movement-blocking tiles, traces axial LOS, and grants one range when the attacker is above the target.
 3. Player and enemy movement walks the selected path and invokes `HexTile.ApplyEnterEffect()` on every entered tile; one-shot traps retain consumed state on that runtime tile.
 4. Skills with `canDestroyTerrain` apply their Damage effects to destructible walls. At zero HP the wall uses `destroyedTile`, or behaves as a Normal non-blocking tile when no fallback is assigned.
+
+## Room map flow
+
+1. Open **Tools > Hex Roguelike > Room Template Painter** to paint `TileData` cells and Shift-click edge cells to mark room entry points. The same window can create six starter templates.
+2. A `RunMapGenerator` chooses 3-6 rooms using difficulty-scaled `hazard` weighting and avoids its most recently selected templates. It creates either a linear path or a branching tree and records the entry-point pair on every edge.
+3. UI calls `SelectNode(nodeId)`. With a combat scene configured, the chosen room survives the scene load; otherwise it is applied to the current grid immediately.
+4. `HexGridManager.Awake()` consumes the pending template, resizes the grid, copies its terrain layout, and generates runtime tiles. Turn and combat managers remain independent.
 
 Push, pull, movement, jump, shield, stun, and immobilize are represented in skill data now; their board/status resolution is intentionally pending until their corresponding gameplay systems exist.

@@ -29,6 +29,19 @@ public class HexGridManager : MonoBehaviour
 
     private void Awake()
     {
+        RoomTemplate selectedRoom = RunMapGenerator.ConsumePendingRoom();
+        if (selectedRoom != null) ApplyRoomTemplate(selectedRoom);
+        else GenerateGrid();
+    }
+
+    public void ApplyRoomTemplate(RoomTemplate room)
+    {
+        if (room == null) return;
+        width = room.GridSize.x;
+        height = room.GridSize.y;
+        terrainPlacements.Clear();
+        foreach (RoomTile tile in room.TileLayout)
+            terrainPlacements.Add(new TerrainTilePlacement { coordinate = tile.coordinate, tileData = tile.tileData });
         GenerateGrid();
     }
 
