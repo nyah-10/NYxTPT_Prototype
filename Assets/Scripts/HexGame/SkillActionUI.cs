@@ -168,6 +168,15 @@ public class SkillActionUI : MonoBehaviour
 
     private void SelectSkill(SkillDefinition skill)
     {
+        if (playerSkills.HasPlannedSkill(skill))
+        {
+            playerSkills.SetLeadingCard(skill);
+            status.text = $"{skill.displayName}을(를) 리딩 카드로 지정했습니다.";
+            detail.text = $"이번 라운드 이니셔티브: {skill.initiative}";
+            RefreshStates();
+            return;
+        }
+
         if (!playerSkills.CanUse(skill)) { status.text = "이미 예약했거나 사용할 수 없는 카드입니다."; return; }
         selectedSkill = skill; Vector2Int source = playerSkills.GetPlanningSource();
         bool chooseAtExecution = true;
@@ -180,7 +189,11 @@ public class SkillActionUI : MonoBehaviour
 
     private void Confirm()
     {
-        if (selectedSkill == null && playerSkills.HasCompletePlan) { ClearGhost(); gridManager.ClearHighlights(); status.text = "카드를 공개합니다"; detail.text = "선제도가 낮은 카드부터 행동합니다."; playerSkills.GetComponent<PlayerController>().turnManager.SubmitPlayerActionCard(playerSkills); RefreshStates(); return; }
+        if (selectedSkill == null && playerSkills.HasCompletePlan)
+        {
+            if (!playerSkills.HasLeadingCard) { status.text = "예약한 카드 중 리딩 카드를 다시 클릭하세요."; return; }
+            ClearGhost(); gridManager.ClearHighlights(); status.text = "카드를 공개합니다"; detail.text = "리딩 카드의 선제도로 행동 순서를 정합니다."; playerSkills.GetComponent<PlayerController>().turnManager.SubmitPlayerActionCard(playerSkills); RefreshStates(); return;
+        }
         if (selectedSkill == null || selectedTarget == InvalidTarget) { status.text = selectedSkill == null ? "먼저 행동 카드를 선택하세요." : "강조된 타일에서 대상을 선택하세요."; return; }
         SkillDefinition committed = selectedSkill; Vector2Int target = selectedTarget;
         if (!playerSkills.Plan(committed, target, gridManager)) { status.text = "이 대상에게는 카드를 사용할 수 없습니다."; return; }
@@ -193,14 +206,20 @@ public class SkillActionUI : MonoBehaviour
         PlayerController player = playerSkills == null ? null : playerSkills.GetComponent<PlayerController>();
         if (player == null || player.turnManager == null || !player.turnManager.CanPlayerAct(player) || playerSkills.IsExecutingPlan) return;
         selectedSkill = null; selectedTarget = InvalidTarget; ClearGhost(); gridManager.ClearHighlights();
+        if (playerSkills.HasPlannedActions && !playerSkills.HasLeadingCard) { status.text = "예약한 카드 중 리딩 카드를 다시 클릭하세요."; return; }
         status.text = playerSkills.HasPlannedActions ? "예약한 카드를 공개합니다" : "행동 없이 턴을 종료합니다"; detail.text = "몬스터 카드와 함께 행동 순서를 결정합니다.";
         player.turnManager.SubmitPlayerActionCard(playerSkills); RefreshStates();
     }
 
     private void RefreshStates()
     {
-        foreach (SkillCardView card in cards) card.SetState(playerSkills != null && playerSkills.CanUse(card.Skill), card.Skill == selectedSkill);
-        if (confirmButton != null) confirmButton.interactable = selectedSkill != null && selectedTarget != InvalidTarget || selectedSkill == null && playerSkills.HasCompletePlan;
+        foreach (SkillCardView card in cards)
+        {
+            bool isLeadingCard = playerSkills != null && playerSkills.IsLeadingCard(card.Skill);
+            bool isPlannedCard = playerSkills != null && playerSkills.HasPlannedSkill(card.Skill);
+            card.SetState(playerSkills != null && playerSkills.CanUse(card.Skill), card.Skill == selectedSkill || isLeadingCard, isPlannedCard);
+        }
+        if (confirmButton != null) confirmButton.interactable = selectedSkill != null && selectedTarget != InvalidTarget || selectedSkill == null && playerSkills.HasCompletePlan && playerSkills.HasLeadingCard;
     }
 
     private static bool HasMovement(SkillDefinition skill) { if (skill?.effects == null) return false; foreach (SkillEffect effect in skill.effects) if (effect.type == SkillEffectType.Move || effect.type == SkillEffectType.Jump) return true; return false; }

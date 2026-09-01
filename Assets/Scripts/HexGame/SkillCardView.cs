@@ -49,11 +49,11 @@ public sealed class SkillCardView : MonoBehaviour, IPointerEnterHandler, IPointe
         handIndex = index;
     }
 
-    public void SetState(bool canUse, bool isSelected)
+    public void SetState(bool canUse, bool isSelected, bool canSelectLeadingCard)
     {
         usable = canUse;
         selected = isSelected;
-        GetComponent<Button>().interactable = canUse;
+        GetComponent<Button>().interactable = canUse || canSelectLeadingCard;
     }
 
     public void OnPointerDown(PointerEventData eventData) => movedDuringDrag = false;

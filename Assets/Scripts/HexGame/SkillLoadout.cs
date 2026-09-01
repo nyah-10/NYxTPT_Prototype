@@ -13,6 +13,7 @@ public class SkillLoadout : MonoBehaviour
     private ActionController actionController;
     private PlayerController player;
     private readonly List<PlannedAction> plannedActions = new();
+    private SkillDefinition leadingCard;
 
     private readonly struct PlannedAction
     {
@@ -26,15 +27,29 @@ public class SkillLoadout : MonoBehaviour
 
     public bool HasPlannedActions => plannedActions.Count > 0;
     public bool HasCompletePlan => HasPlannedSlot(SkillActionSlot.Main) && HasPlannedSlot(SkillActionSlot.Sub);
+    public bool HasLeadingCard => leadingCard != null;
     public bool IsExecutingPlan { get; private set; }
     public event System.Action<string> FeedbackRequested;
 
     public int GetPlannedInitiative()
     {
-        int initiative = int.MaxValue;
+        return leadingCard == null ? 99 : Mathf.Max(1, leadingCard.initiative);
+    }
+
+    public bool HasPlannedSkill(SkillDefinition skill)
+    {
         foreach (PlannedAction action in plannedActions)
-            initiative = Mathf.Min(initiative, Mathf.Max(1, action.Skill.initiative));
-        return initiative == int.MaxValue ? 99 : initiative;
+            if (action.Skill == skill) return true;
+        return false;
+    }
+
+    public bool IsLeadingCard(SkillDefinition skill) => leadingCard == skill;
+
+    public bool SetLeadingCard(SkillDefinition skill)
+    {
+        if (!HasPlannedSkill(skill)) return false;
+        leadingCard = skill;
+        return true;
     }
 
     private void Awake()
@@ -134,7 +149,11 @@ public class SkillLoadout : MonoBehaviour
         IsExecutingPlan = false;
     }
 
-    public void ClearPlan() => plannedActions.Clear();
+    public void ClearPlan()
+    {
+        plannedActions.Clear();
+        leadingCard = null;
+    }
 
     public Vector2Int GetPlanningSource() => player.CurrentCoordinate;
 
