@@ -82,12 +82,8 @@ public class SkillActionUI : MonoBehaviour
         status = Label(prompt.transform, "행동 카드를 선택하세요", new(0, 11), new(720, 24), 17, TextAnchor.MiddleCenter, Color.white, true);
         detail = Label(prompt.transform, "주 행동과 보조 행동을 한 장씩 예약할 수 있습니다.", new(0, -11), new(720, 20), 13, TextAnchor.MiddleCenter, new(.65f, .7f, .78f, 1f));
 
-        GameObject hand = UiObject("Card Hand", root.transform, typeof(Image), typeof(Outline), typeof(SkillHandLayout));
+        GameObject hand = UiObject("Card Hand", root.transform, typeof(RectTransform), typeof(SkillHandLayout));
         SetRect(hand, new(.5f, 0), new(.5f, 0), new(.5f, 0), new(0, 14), new(1280, 292));
-        Image handBackground = hand.GetComponent<Image>();
-        handBackground.color = new(.015f, .02f, .032f, .92f);
-        handBackground.raycastTarget = false;
-        hand.GetComponent<Outline>().effectColor = new(.25f, .34f, .45f, .42f);
         handLayout = hand.GetComponent<SkillHandLayout>();
 
         List<SkillDefinition> skills = ConfiguredSkills();
