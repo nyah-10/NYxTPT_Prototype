@@ -19,9 +19,9 @@
 - `Assets/Scripts/HexGame/ActionController.cs`: Owns one main AP and one sub AP per turn. `UseMainSkill()` spends main AP; `UseMoveAction()` spends sub AP.
 - `Assets/Scripts/HexGame/UnitStats.cs`: Owns HP, death, status durations, combat role, and damage-source threat totals. `TakeDamage()` applies shield mitigation, records actual damage by source, and triggers `Died` at zero.
 - `Assets/Scripts/HexGame/SkillDefinition.cs`: ScriptableObject template for a skill's display name, `initiative`, optional Sprite or Resources icon path, formatted description, slot, targeting data, area, and effect list. Lower initiative values act first.
-- `Assets/Scripts/HexGame/SkillLoadout.cs`: Holds configurable main/sub skills, an ordered per-round action plan, and one selected leading card. `Plan()` reserves cards; the leading card alone supplies the player's round initiative.
+- `Assets/Scripts/HexGame/SkillLoadout.cs`: Holds configurable main/sub skills, per-round card reservations, execution-order choice state, and one selected leading card. `Plan()` reserves cards; the leading card alone supplies initiative, while the player chooses which reserved card resolves first when their queue entry begins.
 - `Assets/Scripts/HexGame/SkillParticleEffects.cs`: Creates short-lived runtime `ParticleSystem` effects for the four example skills. Sword Strike emits layered slash arcs, Arcane Bolt sends plasma motes from source to target, First Aid lifts green pulse particles around the caster, and Leap bursts impact shards at the destination. Each system destroys its generated material when finished.
-- `Assets/Scripts/HexGame/SkillActionUI.cs`: Builds the FHD-scaled card presentation and shows a non-interactive movement/attack/self range preview as soon as a card is selected; actual target input and no-target feedback still resolve on that unit's execution turn.
+- `Assets/Scripts/HexGame/SkillActionUI.cs`: Builds the FHD-scaled card presentation and shows a non-interactive movement/attack/self range preview as soon as a card is selected. During the player's execution entry it re-enables only reserved cards so the player can choose their first action against the current board state; target input and no-target feedback resolve afterwards.
 - `Assets/Scripts/HexGame/SkillHandLayout.cs`: Reflows any hand size in a straight horizontal row using adaptive overlap, hover neighbor separation, and live drag reordering. Cards remain above the HUD bottom edge and do not use a fan curve or resting rotation.
 - `Assets/Scripts/HexGame/SkillCardView.cs`: Separates card input from visual motion, keeps nested card canvases above the parent HUD, and spring-animates layout targets, hover lift, selection, drag following, inertia tilt, focus sorting, and disabled presentation with unscaled time. Reserved cards remain clickable for leading-card designation.
 - `Assets/Scripts/HexGame/InitiativeOrderUI.cs`: Renders player/monster queue badges from `TurnManager` snapshots, marks the active unit with `▶`, dims completed entries, labels dead/disabled skips, shows monster ability cards before reveal, and displays short combat messages.
@@ -39,9 +39,9 @@
 1. Run **Tools > Hex Roguelike > Create Example Skills** to create Sword Strike, Arcane Bolt, First Aid, and Leap assets.
 2. Assign two `Main` and two `Sub` skills to `SkillLoadout`. The scene setup supplies all four examples.
 3. Select either a main or sub skill to preview its reachable or targetable tiles, then press Confirm to reserve only the card. The preview does not lock a target during planning.
-4. Select the other action. Selection order determines whether main or sub resolves first.
+4. Select the other action. Reservation order does not determine resolution order.
 5. Click one reserved card again to mark it as the leading card. Confirm reveals cards and builds the queue using that card's initiative; lower values act first and a tied player acts before a monster.
-6. When movement executes, the player chooses a currently free in-range tile. When an attack executes, candidates are recalculated; one is automatic, several wait for selection, and zero produces `타겟 없음` feedback.
+6. When the player's initiative entry begins, choose either reserved card as the first action. Movement then asks for a currently free in-range tile; attacks recalculate candidates against the latest board state, resolve automatically for one target, wait for a target choice when several are valid, and skip when none are valid. The remaining reserved card resolves afterwards.
 7. Damage, healing, shield, stun, immobilize, movement/jump, push, and pull are resolved by `SkillLoadout`.
 8. A successful immediate or planned commit calls `SkillParticleEffects.Play()` once after gameplay effects resolve.
 

@@ -14,6 +14,8 @@ public class SkillLoadout : MonoBehaviour
     private PlayerController player;
     private readonly List<PlannedAction> plannedActions = new();
     private SkillDefinition leadingCard;
+    private List<PlannedAction> executionQueue;
+    private SkillDefinition selectedExecutionCard;
 
     private readonly struct PlannedAction
     {
@@ -29,6 +31,7 @@ public class SkillLoadout : MonoBehaviour
     public bool HasCompletePlan => HasPlannedSlot(SkillActionSlot.Main) && HasPlannedSlot(SkillActionSlot.Sub);
     public bool HasLeadingCard => leadingCard != null;
     public bool IsExecutingPlan { get; private set; }
+    public bool IsChoosingExecutionOrder => IsExecutingPlan && executionQueue != null && executionQueue.Count > 1 && selectedExecutionCard == null;
     public event System.Action<string> FeedbackRequested;
 
     public int GetPlannedInitiative()
@@ -49,6 +52,21 @@ public class SkillLoadout : MonoBehaviour
     {
         if (!HasPlannedSkill(skill)) return false;
         leadingCard = skill;
+        return true;
+    }
+
+    public bool CanChooseExecutionCard(SkillDefinition skill)
+    {
+        if (!IsChoosingExecutionOrder || skill == null) return false;
+        foreach (PlannedAction action in executionQueue)
+            if (action.Skill == skill) return true;
+        return false;
+    }
+
+    public bool ChooseExecutionCard(SkillDefinition skill)
+    {
+        if (!CanChooseExecutionCard(skill)) return false;
+        selectedExecutionCard = skill;
         return true;
     }
 
@@ -91,7 +109,7 @@ public class SkillLoadout : MonoBehaviour
     public void ExecutePlan(HexGridManager grid)
     {
         if (grid == null || plannedActions.Count == 0) return;
-        List<PlannedAction> executionQueue = new(plannedActions);
+        executionQueue = new(plannedActions);
         plannedActions.Clear();
         IsExecutingPlan = true;
         StartCoroutine(ExecutePlanInOrder(executionQueue, grid));
@@ -99,8 +117,28 @@ public class SkillLoadout : MonoBehaviour
 
     private IEnumerator ExecutePlanInOrder(List<PlannedAction> executionQueue, HexGridManager grid)
     {
-        foreach (PlannedAction action in executionQueue)
+        while (executionQueue.Count > 0)
         {
+            PlannedAction action;
+            if (executionQueue.Count == 1)
+            {
+                action = executionQueue[0];
+            }
+            else
+            {
+                selectedExecutionCard = null;
+                FeedbackRequested?.Invoke("이번 차례에 먼저 사용할 행동 카드를 선택하세요.");
+                yield return new WaitUntil(() => selectedExecutionCard != null);
+
+                int selectedIndex = -1;
+                for (int i = 0; i < executionQueue.Count; i++)
+                    if (executionQueue[i].Skill == selectedExecutionCard) { selectedIndex = i; break; }
+                if (selectedIndex < 0) continue;
+                action = executionQueue[selectedIndex];
+            }
+            executionQueue.Remove(action);
+            selectedExecutionCard = null;
+
             Vector2Int targetCoordinate = player.CurrentCoordinate;
             if (HasMovementEffect(action.Skill))
             {
@@ -162,6 +200,8 @@ public class SkillLoadout : MonoBehaviour
             if (HasMovementEffect(action.Skill))
                 yield return new WaitUntil(() => !player.IsMoving);
         }
+        this.executionQueue = null;
+        selectedExecutionCard = null;
         IsExecutingPlan = false;
     }
 
@@ -169,6 +209,7 @@ public class SkillLoadout : MonoBehaviour
     {
         plannedActions.Clear();
         leadingCard = null;
+        selectedExecutionCard = null;
     }
 
     public Vector2Int GetPlanningSource() => player.CurrentCoordinate;

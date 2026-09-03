@@ -168,6 +168,15 @@ public class SkillActionUI : MonoBehaviour
 
     private void SelectSkill(SkillDefinition skill)
     {
+        if (playerSkills.IsChoosingExecutionOrder)
+        {
+            if (!playerSkills.ChooseExecutionCard(skill)) return;
+            status.text = $"{skill.displayName}을(를) 먼저 사용합니다.";
+            detail.text = "현재 보드 상태를 기준으로 대상 또는 이동 칸을 선택하세요.";
+            RefreshStates();
+            return;
+        }
+
         if (playerSkills.HasPlannedSkill(skill))
         {
             playerSkills.SetLeadingCard(skill);
@@ -236,11 +245,18 @@ public class SkillActionUI : MonoBehaviour
 
     private void RefreshStates()
     {
+        if (playerSkills != null && playerSkills.IsChoosingExecutionOrder)
+        {
+            status.text = "이번 차례에 먼저 사용할 행동 카드를 선택하세요.";
+            detail.text = "이동과 공격 중 현재 보드 상태에 유리한 행동을 먼저 선택할 수 있습니다.";
+        }
+
         foreach (SkillCardView card in cards)
         {
             bool isLeadingCard = playerSkills != null && playerSkills.IsLeadingCard(card.Skill);
             bool isPlannedCard = playerSkills != null && playerSkills.HasPlannedSkill(card.Skill);
-            card.SetState(playerSkills != null && playerSkills.CanUse(card.Skill), card.Skill == selectedSkill || isLeadingCard, isPlannedCard);
+            bool isExecutionChoice = playerSkills != null && playerSkills.CanChooseExecutionCard(card.Skill);
+            card.SetState(playerSkills != null && playerSkills.CanUse(card.Skill), card.Skill == selectedSkill || isLeadingCard, isPlannedCard || isExecutionChoice);
         }
         if (confirmButton != null) confirmButton.interactable = selectedSkill != null && selectedTarget != InvalidTarget || selectedSkill == null && playerSkills.HasCompletePlan && playerSkills.HasLeadingCard;
     }
